@@ -176,6 +176,7 @@ const ChatWindow = () => {
           // loadingMessages will be controlled by the Firebase subscription
           setIsSwitchingUser(false);
           setIsLoading(false);
+          setLoadingMessages(false);
         }
       }
     };
