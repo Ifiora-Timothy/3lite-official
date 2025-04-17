@@ -162,12 +162,7 @@ const ChatWindow = () => {
             setLoadingMessages(false);
           }
 
-          const dataExists = await FirebaseChat.checkIfDataExists(
-            parsedChat._id
-          );
-          if (!dataExists) {
-            await FirebaseChat.syncHistoricalData(parsedChat._id);
-          }
+          await FirebaseChat.syncHistoricalData(parsedChat._id);
         }
       } catch (error) {
         console.error("Failed to initialize chat:", error);
