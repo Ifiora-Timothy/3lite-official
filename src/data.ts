@@ -8,7 +8,7 @@ export const initialChats = [
   {
     id: 2,
     message:
-      "Experience secure, decentralized communication built on the Sui Blockchain",
+      "Experience secure, decentralized communication built on the solana Blockchain",
     time: "12:34 PM",
     type: "received",
   },
@@ -22,7 +22,7 @@ export const initialChats = [
     id: 4,
     type: "sent",
     message:
-      "3lite Messenger is a decentralized chat application built on the Sui blockchain",
+      "3lite Messenger is a decentralized chat application built on the solana blockchain",
     time: "12:34 PM",
   },
   {

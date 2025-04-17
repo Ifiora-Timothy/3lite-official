@@ -279,6 +279,10 @@ chatSchema.statics.getChat = async function ({
         options: {
           sort: { createdAt: 1 }, // Sort messages by createdAt ascending
         },
+        populate: [
+          { path: "sender", select: "username avatar walletAddress status" },
+          { path: "receiver", select: "username avatar walletAddress status" },
+        ],
       })
       .lean(); // Return plain objects instead of Mongoose documents
   } catch (error) {

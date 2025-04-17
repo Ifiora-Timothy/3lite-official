@@ -28,7 +28,7 @@ const AuthMessage = () => {
           <span>
             Experience secure,{" "}
             <span className="text-orange-400">decentralized</span> communication
-            built on the <span className="text-green-400">Sui Blockchain</span>
+            built on the <span className="text-green-400">solana Blockchain</span>
           </span>
         ) : (
           <span>

@@ -154,15 +154,16 @@ const ChatWindow = () => {
           setChatId(parsedChat._id);
           setType(parsedChat.type);
 
-          // Check if we already have cached messages for this chat
-          if (messagesCache.current[parsedChat._id]) {
-            // Use cached messages
-            setMessages(messagesCache.current[parsedChat._id]);
-            // Still set loading to false since we have messages
-            setLoadingMessages(false);
-          }
-
-          await FirebaseChat.syncHistoricalData(parsedChat._id);
+          // // Check if we already have cached messages for this chat
+          // if (messagesCache.current[parsedChat._id]) {
+          //   // Use cached messages
+          //   setMessages(messagesCache.current[parsedChat._id]);
+          //   // Still set loading to false since we have messages
+          //   setLoadingMessages(false);
+          // }
+          setMessages(parsedChat.messages);
+          FirebaseChat.syncHistoricalData(parsedChat.messages, parsedChat._id);
+          setLoadingMessages(false);
         }
       } catch (error) {
         console.error("Failed to initialize chat:", error);
@@ -176,7 +177,6 @@ const ChatWindow = () => {
           // loadingMessages will be controlled by the Firebase subscription
           setIsSwitchingUser(false);
           setIsLoading(false);
-          setLoadingMessages(false);
         }
       }
     };
@@ -204,9 +204,9 @@ const ChatWindow = () => {
 
       try {
         // Only set loading if we don't have cached messages
-        if (!messagesCache.current[chatId]) {
-          setLoadingMessages(true);
-        }
+        // if (!messagesCache.current[chatId]) {
+        //   setLoadingMessages(true);
+        // }
         // Subscribe to messages for this chat
         unsubscribe = FirebaseChat.subscribeToChat(chatId, (newMessages) => {
           // Convert Firebase messages to our Message interface

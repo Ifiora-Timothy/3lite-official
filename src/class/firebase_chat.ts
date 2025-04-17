@@ -1,4 +1,8 @@
-import { IMessage, Message } from "../lib/db/models/message";
+import {
+  IMessage,
+  IpopulatedMessageContent,
+  Message,
+} from "../lib/db/models/message";
 import {
   database,
   ref,
@@ -202,12 +206,13 @@ export class FirebaseChat {
       callback(presence);
     });
   }
-  static async syncHistoricalData(chatId: string) {
+  static async syncHistoricalData(
+    messages: Array<IpopulatedMessageContent>,
+    chatId: string
+  ) {
     try {
       // Fetch messages from MongoDB for the given chat
-      const result = await getChatMessages(chatId);
 
-      const messages = JSON.parse(result).messages;
       console.log("from historic", messages);
 
       for (const message of messages) {

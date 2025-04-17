@@ -21,6 +21,8 @@ export default function ChatInput({
           console.log("Sending message:", message);
           if (disabled) return;
           await handleSend();
+          // clear the input field
+          setMessage("");
         }}
         className="relative flex items-center"
       >

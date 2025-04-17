@@ -96,7 +96,7 @@ export const getChat = cache(
     await dbConnect();
     try {
       const chat = await Chat.getChat({ userId, user2Id });
-      console.log({ chat });
+      console.info({ chat, messages: chat.messages });
       return JSON.stringify(chat);
     } catch (err) {
       console.log({ err });

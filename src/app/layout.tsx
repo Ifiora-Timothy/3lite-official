@@ -29,7 +29,7 @@ const poppins = Poppins({
 
 export const metadata = {
   title: "3Lite",
-  description: "3Lite is a social media app built on the SUI Network",
+  description: "3Lite is a social media app built on the solana Network",
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

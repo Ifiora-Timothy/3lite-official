@@ -1,35 +1,38 @@
+"use client";
 import React from "react";
 import ChatDetails from "./GroupDetails";
 import VerticalLayout from "./VerticalLayout";
 import clsx from "clsx";
 import IconWrapper from "./ui/IconWrapper";
 import CustomIcon from "./ui/CustomIcon";
+import { useChatContext } from "../hooks/useChatContext";
 
 type Props = { className?: string };
 
 const DetailsSidebar = ({ className }: Props) => {
+  const { activeUser } = useChatContext();
   return (
     <VerticalLayout
       header={<Header3 />}
       main={
         <ChatDetails
-          chatType="group"
-          chatData={{
-            id: "123",
-            name: "EliteLabs",
-            image: "/icon/elitelabs.png",
-            isVerified: true,
-            memberCount: 27,
-            members: ["Timothy"], // Your member data
-            media: ["zip", "pdf"], // Your media data
-          }}
-          // chatType="personal"
+          // chatType="group"
           // chatData={{
-          //   id: "456",
-          //   name: "Techdoc",
+          //   id: "123",
+          //   name: "EliteLabs",
           //   image: "/icon/elitelabs.png",
-          //   media: ["zip"],
+          //   isVerified: true,
+          //   memberCount: 27,
+          //   members: ["Timothy"], // Your member data
+          //   media: ["zip", "pdf"], // Your media data
           // }}
+          chatType="personal"
+          chatData={{
+            id: activeUser?._id.toString() || "123",
+            name: activeUser?.username ?? "User",
+            image: activeUser?.avatar ?? "/icon/elitelabs.png",
+            media: ["zip"],
+          }}
         />
       }
       className={clsx("", {
