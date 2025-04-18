@@ -9,9 +9,9 @@ import { ChevronLeft, Search, User } from "lucide-react";
 
 export default function ProfilePage() {
   return (
-    <main className="col-span-full   h-full  ">
+    <main className="col-span-full    h-full  ">
       <VerticalLayout
-        header={<ProfileHeader />}
+        header={<div />}
         main={<ProfileDetails />}
         className="w-full "
       ></VerticalLayout>

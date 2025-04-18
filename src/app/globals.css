@@ -38,6 +38,12 @@
   }
 }
 
+/* Apply this to any container you want to take full height */
+.full-height {
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100);
+}
+
 /* * {
   outline: 1px solid red;
 }

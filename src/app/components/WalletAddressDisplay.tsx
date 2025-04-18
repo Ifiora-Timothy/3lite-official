@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function WalletAddressDisplay({
   walletAddress,
   isGroupChat,
+  className,
 }: {
   walletAddress: string;
   isGroupChat: boolean;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -43,7 +46,12 @@ export default function WalletAddressDisplay({
 
   return (
     <div className="flex items-center justify-start">
-      <span className="text-primary-foreground text-sm font-medium font-['Plus_Jakarta_Sans'] mr-2">
+      <span
+        className={cn(
+          "text-primary-foreground text-sm font-medium font-['Plus_Jakarta_Sans'] mr-2",
+          className
+        )}
+      >
         {truncateAddress(walletAddress)}
       </span>
       <button

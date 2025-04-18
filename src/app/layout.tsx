@@ -36,7 +36,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
       <body
-        className={`${plusJakartaSans.variable} ${syne.variable} ${suse.variable}  ${poppins.variable}   w-screen  overflow-x-hidden dak antialiased`}
+        className={`${plusJakartaSans.variable} ${syne.variable} ${suse.variable}  ${poppins.variable} h-screen  w-screen  overflow-x-hidden dak antialiased`}
       >
         <AuthProvider>
           <AppWalletProvider>{children}</AppWalletProvider>
