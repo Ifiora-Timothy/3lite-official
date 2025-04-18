@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const AuthMessage = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const pathName = usePathname();
-  console.log({ pathName });
+
   useEffect(() => {
     if (pathName === "/signup") {
       setIsSignUp(true);
@@ -28,7 +28,8 @@ const AuthMessage = () => {
           <span>
             Experience secure,{" "}
             <span className="text-orange-400">decentralized</span> communication
-            built on the <span className="text-green-400">solana Blockchain</span>
+            built on the{" "}
+            <span className="text-green-400">solana Blockchain</span>
           </span>
         ) : (
           <span>

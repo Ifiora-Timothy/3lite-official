@@ -22,7 +22,6 @@ function PersonalComponent({
   setActiveUser,
 }: Props) {
   const handleClick = () => {
-    console.log("clicked", user);
     setActiveUser(user);
   };
   return (

@@ -33,5 +33,3 @@ htmlContent = htmlContent.replace(
 );
 
 fs.writeFileSync(path.join(outDir, "index.html"), htmlContent);
-
-console.log("Files combined successfully!");

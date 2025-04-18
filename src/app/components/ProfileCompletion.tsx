@@ -195,15 +195,12 @@ export default function ProfileSetupModal({
 
     setIsSubmitting(true);
     try {
-      console.log({ walletDetails });
-
       const formData = new FormData();
       if (profileImage) {
         formData.append("profile", profileImage);
       }
       const imageUrl = JSON.parse(await uploadImage(formData)).url;
 
-      console.log({ imageUrl });
       if (!walletDetails.walletAddress) {
         throw new Error("Wallet address is undefined");
       }
@@ -218,7 +215,6 @@ export default function ProfileSetupModal({
 
       setUser(JSON.parse(newUser));
       router.push("/chat");
-      console.log({ newUser });
     } catch (error) {
       console.error("Error saving profile:", error);
       toast.error("Error", {

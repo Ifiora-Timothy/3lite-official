@@ -57,7 +57,7 @@ export const getUserByWalletAddress = async (
 
     return JSON.stringify(user);
   } catch (err) {
-    console.log({ err });
+    console.error({ err });
     return null;
   }
 };
@@ -74,7 +74,6 @@ export const createChat = async ({
     type: "private",
     participants: [senderId, receiverId],
   });
-  console.log({ chat }, "chat created");
   return JSON.stringify(chat);
 };
 
@@ -85,7 +84,7 @@ export const getChats = cache(async (userId: string): Promise<string> => {
     const chats = await Chat.getChats({ userId });
     return JSON.stringify(chats);
   } catch (err) {
-    console.log({ err });
+    console.error({ err });
     throw new Error("No chats found");
   }
 });
@@ -99,7 +98,7 @@ export const getChat = cache(
       console.info({ chat, messages: chat.messages });
       return JSON.stringify(chat);
     } catch (err) {
-      console.log({ err });
+      console.error({ err });
       throw new Error("No chats found");
     }
   }
@@ -141,7 +140,6 @@ export const addMessage = async ({
   message: string;
 }) => {
   await dbConnect();
-  console.log("adding message");
   const resp = await Message.addMessage({
     chatId,
     sender,

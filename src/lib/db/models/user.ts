@@ -168,7 +168,6 @@ UserSchema.statics.validateLogin = async function (data: {
   walletAddress: string;
   username: string;
 }): Promise<Users> {
-  console.log({ data });
   const { walletAddress, username } = data;
   if (!walletAddress || !username) {
     throw new Error("Please provide all required fields");
@@ -177,8 +176,6 @@ UserSchema.statics.validateLogin = async function (data: {
   const user = await this.findOne({
     walletAddress,
   });
-
-  console.log({ found: user });
 
   if (!user) {
     throw new Error("Invalid credentials");

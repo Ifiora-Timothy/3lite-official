@@ -11,14 +11,13 @@ export default function WalletConnectionHandler() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  console.log({ pathname });
+
   const { publicKey, connected, disconnect } = useWallet();
   const { setUser } = useAuth();
   const prevConnectedRef = useRef(connected);
   const disconnectWallet = async () => {
     // Disconnect logic here
     await disconnect();
-    console.log("Wallet disconnected");
   };
 
   const keyString = publicKey?.toString();
@@ -26,8 +25,6 @@ export default function WalletConnectionHandler() {
     // Track previous connection state
 
     const storeWalletDetails = async () => {
-      console.log(publicKey?.toString(), connected);
-
       // Check if user just connected (was disconnected before, now connected)
       const justConnected = connected && !prevConnectedRef.current;
 
@@ -75,8 +72,6 @@ export default function WalletConnectionHandler() {
           } else {
             setIsOpen(true);
           }
-
-          console.log("Wallet details stored successfully");
         } catch (error) {
           console.error("Error storing wallet details:", error);
         }

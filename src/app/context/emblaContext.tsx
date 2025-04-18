@@ -20,17 +20,12 @@ export const EmblaContext = createContext({
 
 export const EmblaContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const [prevBtnFxn, setPrevBtnFxn] = useState({
-    fxn: () => {
-      console.log("prevFxnInit");
-    },
+    fxn: () => {},
   });
   const [nextBtnFxn, setNextBtnFxn] = useState({
-    fxn: () => {
-      console.log("nextFxnInit");
-    },
+    fxn: () => {},
   });
   const [currSlide, setCurrSlide] = useState(0);
-  console.log({ prevBtnFxn, nextBtnFxn });
 
   const clickPrev = () => {
     prevBtnFxn.fxn();

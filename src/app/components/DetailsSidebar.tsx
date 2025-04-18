@@ -37,7 +37,7 @@ const DetailsSidebar = ({ className }: Props) => {
       }
       className={clsx("", {
         [className || ""]: className,
-        "hidden lg:grid lg:col-start-13 lg:col-span-4": !className,
+        "hidden lg:grid lg:col-start-12 lg:col-span-4": !className,
       })}
     ></VerticalLayout>
   );

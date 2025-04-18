@@ -1,22 +1,18 @@
+"use client";
 import Message from "./MessageComponent";
-import { IMessage } from "../../../types";
-import { RefObject } from "react";
 import clsx from "clsx";
+import { useChatContext } from "../hooks/useChatContext";
 
-type chatProps = {
-  type: "group" | "private";
-  isLoading: boolean;
-  optimisticMessages: IMessage[];
-  messagesEndRef: RefObject<HTMLDivElement | null>;
-};
-
-const ChatsContainer = ({
-  type,
-  isLoading,
-  optimisticMessages,
-  messagesEndRef,
-}: chatProps) => {
+const ChatsContainer = () => {
   // Show skeleton loaders while loading messages
+  const {
+    type,
+    isLoading,
+    optimisticMessages,
+    messagesEndRef,
+    scrollToBottom,
+  } = useChatContext();
+
   if (isLoading) {
     return (
       <div className="h-full w-full custom-scrollbar px-5 overflow-y-auto">
@@ -33,6 +29,7 @@ const ChatsContainer = ({
     );
   }
 
+  scrollToBottom();
   const renderMessages = () => {
     return optimisticMessages.map((message, index) => {
       // Check if this message is consecutive (same sender as previous message)

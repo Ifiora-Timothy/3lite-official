@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setActiveUser(user);
     localStorage.setItem("3liteuser", JSON.stringify(user));
   };
-  console.log(activeUser);
 
   useEffect(() => {
     const user = localStorage.getItem("3liteuser");

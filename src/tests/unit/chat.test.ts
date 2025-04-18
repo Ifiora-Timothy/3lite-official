@@ -37,7 +37,7 @@ describe("Chat Model", () => {
       username: "receiver",
       walletType: "solflare",
       status: "online",
-        connectionTimestamp: new Date(),
+      connectionTimestamp: new Date(),
       lastSeen: new Date(),
       walletAddress: "receiverwallet",
     });
@@ -121,7 +121,7 @@ describe("Chat Model", () => {
       });
 
       const userChats = await Chat.getChats({ userId: user1._id });
-      // console.log(userChats[0].participants);
+      //
 
       expect(userChats.length).toBe(2);
       expect(
@@ -165,7 +165,6 @@ describe("Chat Model", () => {
           userId: user1._id,
           user2Id: user2._id,
         });
-        console.log({retrievedChat})
 
         expect(retrievedChat).toBeDefined();
         expect(retrievedChat._id.toString()).toBe(chat._id.toString());
@@ -178,7 +177,7 @@ describe("Chat Model", () => {
         ).toBe(true);
         expect(
           retrievedChat.participants.some(
-              //@ts-ignore
+            //@ts-ignore
             (p) => p.username.toString() === user2.username.toString()
           )
         ).toBe(true);

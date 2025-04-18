@@ -1,24 +1,20 @@
-import React, { useState } from "react";
+"use client";
+import { useState } from "react";
 import CustomIcon from "./ui/CustomIcon";
 import clsx from "clsx";
+import { useChatContext } from "../hooks/useChatContext";
 
-export default function ChatInput({
-  handleSend,
-  inputRef,
-  disabled = false,
-}: {
-  handleSend: () => Promise<void>;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  disabled?: boolean;
-}) {
+export default function ChatInput() {
   const [message, setMessage] = useState("");
+  const { isLoading, handleSend, inputRef } = useChatContext();
+
+  const disabled = isLoading ?? false;
 
   return (
     <div className="w-full py-6 px-5 max-w-4xl mx-auto">
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          console.log("Sending message:", message);
           if (disabled) return;
           await handleSend();
           // clear the input field

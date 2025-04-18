@@ -43,7 +43,6 @@ type TMessage = {
 
 export class FirebaseChat {
   static async syncMessage(message: TMessage) {
-    console.log("syncing message", message);
     const sanitizedMessage = {
       _id: message._id.toString(),
       chat: message.chat.toString(),
@@ -78,7 +77,6 @@ export class FirebaseChat {
   }
 
   static async syncChat(chat: IChat) {
-    console.log({ chat: `chats/${chat._id.toString()}/info` });
     const chatRef = ref(database, `chats/${chat._id.toString()}/info`);
     //consrvert object ids to strings
     const sanitizedChats = {
@@ -212,8 +210,6 @@ export class FirebaseChat {
   ) {
     try {
       // Fetch messages from MongoDB for the given chat
-
-      console.log("from historic", messages);
 
       for (const message of messages) {
         const sanitizedMessage = {

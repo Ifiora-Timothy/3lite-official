@@ -28,7 +28,7 @@ const ChatsSidebar = () => {
 
     try {
       const users = await getUsersFromRegex(userRegex);
-      console.log({ users });
+
       if (!user?._id) {
         setIsFetching(false);
         setSearchResults([]);
@@ -39,11 +39,6 @@ const ChatsSidebar = () => {
         (thisUser: { _id: { toString: () => string } }) =>
           thisUser._id.toString() !== user._id
       );
-      console.log({
-        userId: user._id,
-
-        parsedUsers,
-      });
 
       setSearchResults(parsedUsers);
     } catch (error) {
@@ -67,10 +62,8 @@ const ChatsSidebar = () => {
     if (!user?._id) return;
     try {
       setIsFetching(true);
-      console.log("user", user);
       const chats = await getChats(user?._id);
       const parsedChats: IPopulatedChat[] = JSON.parse(chats);
-      console.log("parsedChats", parsedChats);
 
       if (parsedChats.length > 0) {
         const otherParticipant = parsedChats[0].participants.filter(
@@ -136,7 +129,7 @@ const ChatsSidebar = () => {
       const existingChat = personalChats.find((chat) =>
         chat.participants.some((participant) => participant._id === user._id)
       );
-      console.log("existingChat", user);
+
       if (existingChat) {
         return {
           _id: user._id,
@@ -155,7 +148,6 @@ const ChatsSidebar = () => {
       };
     });
   }
-  console.log("searchResults", searchResults, "personalChats", personalChats);
 
   return (
     <div className="pt-5  h-full flex flex-col  border-r">

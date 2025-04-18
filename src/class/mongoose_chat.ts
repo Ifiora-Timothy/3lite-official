@@ -65,8 +65,6 @@ export class MongoChat {
 
     // Listen for changes
     changeStream.on("change", async (change) => {
-      console.log("Change event received:", change.operationType);
-
       try {
         let updatedMessages: IMessage[] = [];
         switch (change.operationType) {
@@ -93,7 +91,6 @@ export class MongoChat {
             break;
 
           default:
-            console.log("Unhandled operation type:", change.operationType);
             return;
         }
 
@@ -172,8 +169,6 @@ export class MongoChat {
     // Listen for changes
 
     changeStream.on("change", async (change) => {
-      console.log("Change event received:", change.operationType);
-
       try {
         let updatedChats: IChat[] = [];
         switch (change.operationType) {
@@ -200,7 +195,6 @@ export class MongoChat {
             break;
 
           default:
-            console.log("Unhandled operation type:", change.operationType);
             return;
         }
 
@@ -233,7 +227,7 @@ export class MongoChat {
     newContent: string
   ) {
     const newId = new mongoose.mongo.ObjectId(messageId);
-    console.log({ newId });
+
     const resp = await Message.findByIdAndUpdate(
       newId,
       {

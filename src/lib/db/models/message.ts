@@ -178,7 +178,7 @@ messageSchema.statics.getMessages = async function ({
   // Build query with optional "before" date for pagination
 
   //  use the query that match the index
-  console.log("getting messages", { chatId, limit, before });
+
   const query: any = {
     chat: chatId,
   };
@@ -271,7 +271,6 @@ messageSchema.statics.addMessage = async function ({
       );
     }
 
-    console.log("creating..", createdAt);
     // Create the message with specified ID
     const message = await this.create(
       [
@@ -295,7 +294,6 @@ messageSchema.statics.addMessage = async function ({
         "username avatar status walletAddress"
       )
     ).populate("receiver", "username avatar status walletAddress");
-    console.log("created", "populated", populatedMessage);
 
     // Update chat with reference to this new message
     const chatDoc = await Chat.findByIdAndUpdate(
@@ -331,7 +329,7 @@ messageSchema.statics.addMessage = async function ({
     // Sync with Firebase for real-time updates
     if (chat) {
       await FirebaseChat.syncChat(chat);
-      console.log({ syncChat: populatedMessage });
+
       await FirebaseChat.syncMessage({
         _id: populatedMessage._id.toString(),
         chat: populatedMessage.chat.toString(),
@@ -351,7 +349,6 @@ messageSchema.statics.addMessage = async function ({
       isNewChat: isNewChat,
     };
   } catch (error) {
-    console.log("error creating");
     // Rollback changes if anything fails
     await session.abortTransaction();
     throw error;
