@@ -1,41 +1,50 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import VerticalLayout from "./VerticalLayout";
 import IconWrapper from "./ui/IconWrapper";
 import CustomIcon from "./ui/CustomIcon";
-import ChatsSidebar from "./ChatsSidebar";
+// import ChatsSidebar from "./ChatsSidebar";
 import clsx from "clsx";
+import ChatList from "./ChatSidebarOg";
+import Button from "../UI/Button";
+import { Plus } from "lucide-react";
+import { useChat } from "../contexts/ChatContext";
 
 type Props = { className?: string };
 
 export default function SidebarWindow({ className }: Props) {
+ 
+  const {setShowChatList,isMobile} = useChat();
+
+  const handleChatSelect = () => {
+    if (isMobile) {
+      setShowChatList(false);
+    }
+  };
+
   return (
     <VerticalLayout
       header={
-        <div className="h-full border-r  flex justify-between px-5 items-center ">
-          <div className="flex justify-start items-center gap-1.5">
-            <div className="justify-start text-primary text-xl font-bold font-plusJakartaSans">
-              Messages
-            </div>
-            <div className="w-10 px-2.5 py-1 rounded-[100px] outline outline-1 outline-offset-[-1px] outline-blue-600 inline-flex flex-col justify-center items-center gap-2.5">
-              <div className="justify-start text-blue-600 text-xs font-bold font-['Plus_Jakarta_Sans'] leading-none">
-                32
-              </div>
-            </div>
-          </div>
-          <IconWrapper className="outline-primary-foreground">
-            <CustomIcon
-              name="edit"
-              className="stroke-primary dark:stroke-primary-foreground fill-none"
-              width={18}
-              height={18}
-            />
-          </IconWrapper>
+        <div className="flex px-4  items-center justify-between">
+          <h2 className="text-xl rounded-lg font-bold">Messages</h2>
+
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<Plus size={18} />}
+            className="shrink-0"
+          >
+            New Chat
+          </Button>
         </div>
       }
-      main={<ChatsSidebar />}
-      className={clsx("", {
-        "col-span-4 hidden md:grid md:col-span-6 md:col-start-2 col-start-2 ":
-          !className,
+      main={
+        <div className="md:w-80">
+          <ChatList onChatSelect={handleChatSelect} />
+        </div>
+      }
+      className={clsx("border-r border-white/10", {
+        " ": !className,
         [className || ""]: className,
       })}
     ></VerticalLayout>

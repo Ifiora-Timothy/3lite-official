@@ -45,7 +45,7 @@ const layout = ({ children }: PropsWithChildren) => {
           {children}
         </div>
       </div>
-      <div className="h-full overflow-hidden bg-red-200 w-screen sm:hidden">
+      <div className="h-full overflow-hidden  w-screen sm:hidden">
         <MobileAuth>{children}</MobileAuth>
       </div>
     </>

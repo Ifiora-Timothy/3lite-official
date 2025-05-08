@@ -1,138 +1,87 @@
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronsRightIcon } from "lucide-react";
-import CustomIcon from "./ui/CustomIcon";
+import React from 'react';
+import { MessageSquare, Twitter, Github, Linkedin } from 'lucide-react';
 
-const Footer = () => {
-  const links = [
-    {
-      title: "About Us",
-      href: "#",
-    },
-    {
-      title: "Our Services",
-      href: "#",
-    },
-    {
-      title: "Community",
-      href: "#",
-    },
-    {
-      title: "Testimonials",
-      href: "#",
-    },
-    {
-      title: "FAQ",
-      href: "#",
-    },
-    {
-      title: "Privacy Policy",
-      href: "/privacy",
-    },
-  ];
-
+const Footer: React.FC = () => {
   return (
-    <section className="w-full relative overflow-hidden">
-      <div className="lg:p-[120px] sm:p-[80px] p-[30px] lg:pb-[60px] pb-[60px] w-full">
-        <div className="grid grid-cols-12 gap-y-[40px]">
-          <div className="lg:col-[1/3] flex justify-center items-start col-span-6">
-            <div className="w-[100px] rounded-full relative">
-              <Image
-                src="/general/logo.jpg"
-                width={100}
-                height={100}
-                className="w-full rounded-full h-full"
-                alt="logo"
-              />
+    <footer className="bg-gray-900 text-white pt-16 pb-8">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          <div className="col-span-1 md:col-span-1">
+            <div className="flex items-center mb-4">
+              <MessageSquare className="h-7 w-7 text-indigo-400 mr-2" />
+              <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                3lite Messenger
+              </span>
+            </div>
+            <p className="text-gray-400 mb-4">
+              The next generation messaging app for crypto natives.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+                <Github className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors">
+                <Linkedin className="h-5 w-5" />
+              </a>
             </div>
           </div>
-
-          <div className="justify-center col-span-6 lg:col-[3/8] font-syne items-start flex">
-            <div className="flex-col justify-start items-start gap-4 inline-flex font-Poppins">
-              <div className="text-white text-sm font-bold">Quick Links</div>
-              <div className="flex-col justify-start items-start gap-3 flex opacity-60">
-                {links.map((link, index) => (
-                  <Link
-                    key={index}
-                    href={link.href}
-                    className="text-white underline-under flex items-center gap-1 decoration-slate-400 underline-offset-2 text-sm font-normal"
-                  >
-                    <ChevronsRightIcon size={16} />
-                    {link.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Product</h3>
+            <ul className="space-y-2">
+              <li><a href="#features" className="text-gray-400 hover:text-white transition-colors">Features</a></li>
+              <li><a href="#how-it-works" className="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Roadmap</a></li>
+            </ul>
           </div>
-
-          <div className="col-span-full lg:col-[8/13] justify-center items-start gap-7 inline-flex">
-            <div className="flex-col gap-5 justify-between items-start flex">
-              <div className="py-0.5 flex-row gap-1 lg:flex-col justify-start items-start flex">
-                <div
-                  style={{
-                    WebkitTextFillColor: "transparent",
-                  }}
-                  className="bg-gradient-to-b from-[#FFFFFF] to-slate-600 bg-clip-text mx-auto text-center flex justify-center font-Syne w-full font-semibold text-2xl sm:text-3xl"
-                >
-                  <h1>Join the 3lite </h1>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Company</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#why-3lite" className="text-gray-400 hover:text-white transition-colors">Why 3lite?</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Legal</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Cookies</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-500 text-sm">
+              &copy; {new Date().getFullYear()} 3lite Messenger. All rights reserved.
+            </p>
+            <div className="mt-4 md:mt-0">
+              <div className="flex items-center space-x-2">
+                <div className="px-3 py-1 bg-indigo-900/50 rounded-full border border-indigo-800/50 flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-green-400 mr-2"></div>
+                  <span className="text-xs text-gray-400">All systems operational</span>
                 </div>
-
-                <div className="self-stretch text-white text-2xl sm:text-3xl font-semibold font-['Tomato Grotesk']">
-                  Community
-                </div>
-              </div>
-
-              <div className="w-fit max-w-full pl-5 rounded-[99px] border border-[#77679f] justify-between items-center flex">
-                <input
-                  type="text"
-                  placeholder="Enter Your Gmail"
-                  className="grow shrink outline-none bg-transparent text-white sm:text-lg text-sm font-medium"
-                />
-
-                <div className="shrink-0 bg-gradient-to-b hover:bg-gradient-to-t hover:pb-[1px] active:p-[0.4px] rounded-full from-[#77679F] to-[rgba(119,103,159,0)] pt-[1px] px-[1px]">
-                  <div className="rounded-full bg-background">
-                    <button className="font-syne h-[50px] p-2 sm:p-[10px_35px] rounded-none sm:rounded-full text-white text-sm sm:text-lg font-normal bg-gradient-to-r from-[#140F2A] to-[#472F8C] hover:opacity-90 transition-opacity">
-                      Join us
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <CustomIcon
-                  name="instagram"
-                  width={33}
-                  height={33}
-                  className=""
-                />
-                <CustomIcon
-                  name="linkedin"
-                  width={33}
-                  height={33}
-                  className=""
-                />
-                <CustomIcon
-                  name="facebook"
-                  width={33}
-                  height={33}
-                  className=""
-                />
+                <select className="bg-gray-800 border border-gray-700 text-gray-300 rounded-md text-xs py-1 px-2">
+                  <option>English</option>
+                  <option>Spanish</option>
+                  <option>French</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Big App Name Section */}
-      <div className="relative bg-gradient-to-b from-brand from-70% to-blue-800  h-[200px]">
-        <div className="w-full pt-4 absolute -bottom-4 left-0 ">
-          <h1 className="text-center font-black text-transparent  bg-clip-text bg-gradient-to-b from-[#FFFFFF] to-[#77679F] text-5xl md:text-6xl lg:text-[10rem] font-['Tomato Grotesk']">
-            3lite Messenger
-          </h1>
-        </div>
-      </div>
-    </section>
+    </footer>
   );
 };
 

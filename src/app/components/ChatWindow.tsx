@@ -1,11 +1,20 @@
-import SendMsgComponent from "./SendMsgComponent";
-import ChatsContainer from "./ChatsContainer";
+"use client"
+import { useChat } from "../contexts/ChatContext";
+import ChatsContainer from "./Chat/ChatsContainer";
+
 
 const ChatWindow = () => {
+  const {setShowProfile,setShowChatList,isMobile} = useChat();
+
+
+
   return (
-    <div className="border-r flex flex-col h-full">
-      <ChatsContainer />
-      <SendMsgComponent />
+    <div className="border-r w-full border-white/10 flex flex-col h-full">
+      <ChatsContainer
+        onViewProfile={() => setShowProfile(true)}
+        onShowChatList={() => setShowChatList(true)}
+        isMobile={isMobile}
+      />
     </div>
   );
 };

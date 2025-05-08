@@ -1,52 +1,64 @@
+
 import React, { PropsWithChildren } from "react";
 import VerticalLayout from "../components/VerticalLayout";
-import Link from "next/link";
-import Image from "next/image";
 import SidebarCollapsed from "../components/SidebarCollapsed";
-
 import { ChatProvider } from "../providers/ChatContext";
+import Logo from "../UI/Logo";
+import {
+  ChatProvider as ChatNewProvider,
+  
+} from "../contexts/ChatContext";
+import Link from "next/link";
+
 
 function SidebarMini() {
+
   return (
     <VerticalLayout
       header={
-        <Link
-          href="/"
-          className="w-full h-full bg-background flex justify-center items-center"
-        >
-          <Image
-            src="/icon/avatar2.png"
-            alt="Logo"
-            width={250}
-            quality={100}
-            priority
-            height={250}
-            className=" size-8 rounded-full"
-          />
+        <Link href="/">
+
+        <div className="w-full pt-3  place-items-center ">
+          <div className=" w-fit ">
+            <Logo size={32} />
+          </div>
+        </div>
         </Link>
       }
-      main={<SidebarCollapsed />}
-      className="w-full  "
+      main={
+        <SidebarCollapsed/>
+      }
+      className="w-full  border-r border-white/10"
     ></VerticalLayout>
   );
 }
 
-export default function Chatlayout({ children }: PropsWithChildren) {
+// Move this component inside the provider
+function ChatLayoutContent({ children }: PropsWithChildren) {
   return (
-    <ChatProvider>
-      <div
-        style={{
-          gridTemplateColumns: "repeat(16, minmax(0, 1fr))",
-        }}
-        className="grid     h-full  w-screen grid-cols-16 "
-      >
-        <div className="col-span-3 sm:col-span-2 md:col-span-1 border-r">
-          <SidebarMini />
-        </div>
-        <div className="grid w-full grid-cols-subgrid col-[span_13_/_span_13]  sm:col-[span_14_/_span_14] md:col-[span_15_/_span_15] md:col-start-2">
-          {children}
-        </div>
+    <div
+      style={{
+        backgroundColor: "var(--bg-color)",
+        color: "var(--text-color)",
+        gridTemplateColumns: "repeat(16, minmax(0, 1fr))",
+      }}
+      className="h-screen w-screen relative flex"
+    >
+      <div className="md:w-16   glass-effect   shrink-0">
+        <SidebarMini />
       </div>
-    </ChatProvider>
+
+      <div className="w-full">{children}</div>
+    </div>
+  );
+}
+
+export default function ChatLayout({ children }: PropsWithChildren) {
+  return (
+    <ChatNewProvider>
+      <ChatProvider>
+        <ChatLayoutContent>{children}</ChatLayoutContent>
+      </ChatProvider>
+    </ChatNewProvider>
   );
 }

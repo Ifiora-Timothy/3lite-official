@@ -1,23 +1,25 @@
-import ChatTop from "@/app/components/ChatTop";
+"use client";
 import ChatWindow from "@/app/components/ChatWindow";
-import DetailsSidebar from "@/app/components/DetailsSidebar";
-import VerticalLayout from "@/app/components/VerticalLayout";
-import clsx from "clsx";
-import SidebarWindow from "../../components/SidebarWindow";
+import SidebarWindow from "@/app/components/SidebarWindow";
+import { useChat } from "@/app/contexts/ChatContext";
 
 export default function page() {
+  const { showChatList, isMobile } = useChat();
+
   return (
-    <div className="contents">
-      <SidebarWindow className="col-span-4 hidden md:grid md:col-span-5 lg:col-span-4 md:col-start-1 col-start-1 " />
-      <VerticalLayout
-        header={<ChatTop />}
-        main={<ChatWindow />}
-        className={clsx(
-          "col-[span_13_/_span_13]  sm:col-[span_14_/_span_14] md:col-span-10 md:col-start-6  lg:col-span-7 lg:col-start-5",
-          {}
-        )}
-      ></VerticalLayout>
-      <DetailsSidebar />
+    <div className="w-full  h-full flex" >
+      <div
+        style={{
+          backgroundColor: "var(--bg-color)",
+        }}
+        className={`${showChatList ? "flex" : "hidden"} md:flex  ${
+          isMobile ? "absolute inset-0 z-20" : ""
+        } md:relative    min-w-80 glass-effect shrink-0  h-full`}
+    
+    >
+        <SidebarWindow className="h-full w-full  glass-effect" />
+      </div>
+      <ChatWindow />
     </div>
   );
 }

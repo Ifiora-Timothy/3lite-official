@@ -3,9 +3,11 @@ export type UserDetails = {
   username: string;
   walletAddress: string;
   lastMessage?: string;
-  avatar: string;
+  avatar?: string;
   walletType: string;
   connectionTimestamp?: Date;
+  pinnedChats: string[];
+  status: "online" | "offline";
 };
 
 export interface IMessage {
@@ -28,7 +30,7 @@ export interface IMessage {
     status?: string;
   };
   createdAt: Date;
-  deliveryStatus?: "sending" | "sent" | "failed";
+  deliveryStatus?: "sending"|"sent" | "delivered" | "read";
 }
 
 export type TactiveUser = {

@@ -14,35 +14,36 @@ import { TactiveUser } from "../../../types";
 import { addMessage, getChat } from "@/actions/dbFunctions";
 import { FirebaseChat } from "@/class/firebase_chat";
 import useAuth from "../hooks/useAuth";
-
+import { getChats, getUsersFromRegex } from "@/actions/dbFunctions";
 import mongoose from "mongoose";
 import { IMessage } from "../../../types";
+import { IPopulatedChat } from "@/lib/db/models/chat";
+import { useChat } from "../contexts/ChatContext";
 export const ChatContext = createContext<{
-  activeUser: TactiveUser | null;
-  setActiveUser: (user: TactiveUser | null) => void;
   type: "group" | "private";
   isLoading: boolean;
   optimisticMessages: IMessage[];
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
-  handleSend: () => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  handleSend: () => Promise<void>;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
   scrollToBottom: () => void;
+  getAllChats:()=>Promise<null|IPopulatedChat[]>;
 }>(
   {} as {
-    activeUser: TactiveUser | null;
-    setActiveUser: (user: TactiveUser | null) => void;
     type: "group" | "private";
     isLoading: boolean;
     optimisticMessages: IMessage[];
     messagesEndRef: React.RefObject<HTMLDivElement | null>;
-    handleSend: () => void;
-    inputRef: React.RefObject<HTMLInputElement | null>;
+    handleSend: () => Promise<void>;
+    inputRef: React.RefObject<HTMLTextAreaElement | null>;
     scrollToBottom: () => void;
+    getAllChats:()=>Promise<null|IPopulatedChat[]>
   }
 );
 
 export const ChatProvider = ({ children }: PropsWithChildren) => {
-  const [activeUser, setActiveUser] = useState<TactiveUser | null>(null);
+  const {activeChat,setActiveChat}= useChat();
+  // const [activeUser, setActiveUser] = useState<TactiveUser | null>(null);
 
   // State to track the current chat ID
   const [chatId, setChatId] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Reference to the input field for message entry
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Track the previous active user ID to detect changes
   const prevActiveUserIdRef = useRef<string | null>(null);
@@ -97,26 +98,28 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     scrollToBottom();
   }, [optimisticMessages]);
 
+  
+
   // Create a memoized key for the chat to help with caching
   const chatKey = useMemo(() => {
-    if (activeUser?._id && user?._id) {
-      return `chat-${user._id}-${activeUser._id}`;
+    if (activeChat?._id && user?._id) {
+      return `chat-${user._id}-${activeChat._id}`;
     }
     return null;
-  }, [activeUser?._id, user?._id]);
+  }, [activeChat?._id, user?._id]);
 
   /**
    * Clear messages when switching users to prevent flashing of previous messages
    */
   useEffect(() => {
     // If activeUser has changed, set switching state and clear messages
-    if (activeUser?._id !== prevActiveUserIdRef.current && activeUser?._id) {
+    if (activeChat?._id !== prevActiveUserIdRef.current && activeChat?._id) {
       setLoadingMessages(true); // Set this true immediately when switching users
       setIsSwitchingUser(true);
       setMessages([]);
-      prevActiveUserIdRef.current = activeUser._id;
+      prevActiveUserIdRef.current = activeChat._id;
     }
-  }, [activeUser?._id]);
+  }, [activeChat?._id]);
 
   /**
    * Initialize chat when users are selected
@@ -125,13 +128,13 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
   // Modify the user switching effect to also trigger loadingMessages
   useEffect(() => {
     // If activeUser has changed, set switching state and clear messages
-    if (activeUser?._id !== prevActiveUserIdRef.current && activeUser?._id) {
+    if (activeChat?._id !== prevActiveUserIdRef.current && activeChat?._id) {
       setIsSwitchingUser(true);
       setLoadingMessages(true); // Set this true immediately when switching users
       setMessages([]);
-      prevActiveUserIdRef.current = activeUser._id;
+      prevActiveUserIdRef.current = activeChat._id;
     }
-  }, [activeUser?._id]);
+  }, [activeChat?._id]);
 
   // Modify the chat initialization effect
   useEffect(() => {
@@ -139,7 +142,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
 
     const initializeChat = async () => {
       // Return early if either user is not defined
-      if (!activeUser?._id || !user?._id) {
+      if (!activeChat?._id || !user?._id) {
         if (isMounted) {
           setIsLoading(false);
           setIsSwitchingUser(false);
@@ -156,7 +159,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
         }
 
         // Get chat data from database using server action
-        const chatData = await getChat(user._id, activeUser._id);
+        const chatData = await getChat(user._id, activeChat._id);
         const parsedChat = JSON.parse(chatData);
 
         // If no chat exists between these users
@@ -273,10 +276,14 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
    * Uses optimistic updates for immediate UI feedback
    */
   const handleSend = async () => {
-    if (!inputRef.current || !activeUser?.username || !user?._id) return;
+    console.log("Sending message1:");
+    if (!inputRef.current || !activeChat?.username || !user?._id) return;
 
+    console.log("Sending message2:", inputRef.current.value);
     const message = inputRef.current.value.trim();
     if (!message) return;
+
+    console.log("Sending message3:", message);
 
     // Generate temporary ID for optimistic update
     const tempId = new mongoose.Types.ObjectId().toString();
@@ -295,10 +302,10 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
       },
       contentType: "text",
       receiver: {
-        _id: activeUser._id,
-        username: activeUser.username,
-        avatar: activeUser.avatar,
-        walletAddress: activeUser.walletAddress,
+        _id: activeChat._id,
+        username: activeChat.username,
+        avatar: activeChat.avatar,
+        walletAddress: activeChat.walletAddress ?? "0x0",
       },
       createdAt,
       deliveryStatus: "sending",
@@ -322,7 +329,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
             chatId,
             createdAt,
             sender: user._id,
-            receiver: activeUser._id,
+            receiver: activeChat._id,
             message,
           });
           // If this is a new chat, update the chatId
@@ -335,7 +342,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
           // Update UI to show message failed
           const errorMessage: IMessage = {
             ...optimisticMessage,
-            deliveryStatus: "failed",
+            deliveryStatus: "sending",
           };
           addOptimisticMessage(errorMessage);
         }
@@ -343,11 +350,47 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
+   const getAllChats = async ():Promise<null|IPopulatedChat[]> => {
+    console.log("user",user)
+      if (!user?._id) return null;
+      try {
+       
+        const chats = await getChats(user?._id);
+        const parsedChats: IPopulatedChat[] = JSON.parse(chats).filter((chat:any)=>{
+          // make date in updated type to be a date type
+          chat.updatedAt = new Date(chat.updatedAt);
+          return chat;
+        });
+  
+        if (parsedChats.length > 0) {
+          const otherParticipant = parsedChats[0].participants.filter(
+            (participant) => participant._id !== user._id
+          )[0];
+  
+          setActiveChat({
+            _id: otherParticipant._id,
+            username: otherParticipant.username,
+            avatar: otherParticipant.avatar || "",
+            walletAddress: otherParticipant.walletAddress ?? "0x0",
+            lastMessage: parsedChats[0].lastMessage?.content ?? "no chat yet",
+            updatedAt: parsedChats[0].updatedAt.toISOString(),
+            status: otherParticipant.status,
+            unreadCount: parsedChats[0].unreadCount,
+            pinned: user.pinnedChats?.includes(parsedChats[0]._id),
+            type: parsedChats[0].type,
+          });
+        }
+
+        return parsedChats;
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+        throw Error("Failed to load chats");
+      } 
+    };
+  
   return (
     <ChatContext.Provider
       value={{
-        activeUser,
-        setActiveUser,
         type,
         isLoading: isLoading || isSwitchingUser || loadingMessages,
         optimisticMessages,
@@ -355,6 +398,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
         handleSend,
         inputRef,
         scrollToBottom,
+        getAllChats
       }}
     >
       {children}

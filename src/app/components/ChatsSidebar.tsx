@@ -11,9 +11,10 @@ import { IPopulatedChat } from "@/lib/db/models/chat";
 import EmptyGroupChats from "./ui/EmptyGroupChat";
 import ChatSearch from "./ChatSearch";
 import useAuth from "../hooks/useAuth";
+import { getPersonalandGroupChats } from "@/lib/utils/helpers";
 
 const ChatsSidebar = () => {
-  const { setActiveUser } = useChatContext();
+  const { setActiveUser,getAllChats:getFullChat} = useChatContext();
   const { activeUser: user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -59,31 +60,22 @@ const ChatsSidebar = () => {
   };
 
   const getAllChats = async () => {
-    if (!user?._id) return;
+    setIsFetching(true);
+    setError(null);
+
     try {
-      setIsFetching(true);
-      const chats = await getChats(user?._id);
-      const parsedChats: IPopulatedChat[] = JSON.parse(chats);
-
-      if (parsedChats.length > 0) {
-        const otherParticipant = parsedChats[0].participants.filter(
-          (participant) => participant._id !== user._id
-        )[0];
-
-        setActiveUser({
-          _id: otherParticipant._id,
-          username: otherParticipant.username,
-          avatar: otherParticipant.avatar || "",
-          walletAddress: otherParticipant.walletAddress,
-          lastMessage: parsedChats[0].lastMessage?.content ?? "no chat yet",
-        });
+      const chats = await getFullChat();
+      if (!chats) {
+        setError("Failed to fetch chats");
+        return;
       }
 
-      setCurrChats(parsedChats);
-    } catch (error) {
+      setCurrChats(chats);
+    } catch (error:any) {
       console.error("Error fetching chats:", error);
-      setError("Failed to load chats");
-    } finally {
+      setError(error.message);
+    } 
+    finally {
       setIsFetching(false);
     }
   };
@@ -94,63 +86,11 @@ const ChatsSidebar = () => {
     }
   }, [user?._id]);
 
-  const groupChats = currChats.filter(
-    (chat) => chat.type === "group" && chat.participants.length > 2
-  );
-  const personalChats = currChats.filter(
-    (chat) => chat.type === "private" && chat.participants.length === 2
-  );
 
-  let renderedGroupChats,
-    renderedPersonalChats: {
-      _id: string;
-      username: string;
-      avatar: string;
-      lastMessage: string;
-      walletAddress: string;
-    }[];
-  if (searchQuery.length <= 2) {
-    renderedGroupChats = groupChats;
-    renderedPersonalChats = personalChats.map((personalChat) => {
-      const otherParticipant = personalChat.participants.find(
-        (participant) => participant._id !== user?._id
-      )!;
-      return {
-        _id: otherParticipant._id,
-        username: otherParticipant.username,
-        avatar: otherParticipant.avatar || "", // Provide default empty string if avatar is undefined
-        lastMessage: personalChat.lastMessage?.content ?? "no chat yet",
-        walletAddress: otherParticipant.walletAddress,
-      };
-    });
-  } else {
-    renderedPersonalChats = searchResults.map((user) => {
-      // if  we already have the user in our chats, we don't want to return themso we can access the last message
-      const existingChat = personalChats.find((chat) =>
-        chat.participants.some((participant) => participant._id === user._id)
-      );
 
-      if (existingChat) {
-        return {
-          _id: user._id,
-          username: user.username,
-          avatar: user.avatar,
-          lastMessage: existingChat.lastMessage?.content ?? "no chat yet",
-          walletAddress: user.walletAddress,
-        };
-      }
-      return {
-        _id: user._id,
-        username: user.username,
-        avatar: user.avatar,
-        lastMessage: user.lastMessage || "no chat yet",
-        walletAddress: user.walletAddress,
-      };
-    });
-  }
-
+  let [renderedGroupChats,renderedPersonalChats] =getPersonalandGroupChats(currChats,searchQuery,searchResults,user);
   return (
-    <div className="pt-5  h-full flex flex-col  border-r">
+    <div className="pt-5    h-full flex flex-col ">
       <div className="px-5 ">
         <ChatSearch handleType={handleType} />
       </div>
@@ -167,9 +107,9 @@ const ChatsSidebar = () => {
             </div>
           </div>
           <div className="">
-            {groupChats.length > 0 ? (
-              groupChats.map((groupChat) => {
-                if (!groupChat.groupDetails?.groupName) return null;
+            {renderedGroupChats.length > 0 ? (
+              renderedGroupChats.map((groupChat:any) => {
+                if (!renderedGroupChats.groupDetails?.groupName) return null;
                 return (
                   <GroupComponent
                     key={groupChat._id}

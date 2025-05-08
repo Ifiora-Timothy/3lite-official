@@ -5,8 +5,7 @@ import { useContext } from "react";
 
 export const useChatContext = () => {
   const {
-    activeUser,
-    setActiveUser,
+ 
     type,
     isLoading,
     optimisticMessages,
@@ -14,10 +13,10 @@ export const useChatContext = () => {
     handleSend,
     inputRef,
     scrollToBottom,
+    getAllChats
   } = useContext(ChatContext);
   return {
-    activeUser,
-    setActiveUser,
+    getAllChats,
     type,
     isLoading,
     optimisticMessages,

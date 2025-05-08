@@ -5,6 +5,7 @@ import { Message } from "@/lib/db/models/message";
 import { User } from "@/lib/db/models/user";
 import { escapeRegex } from "@/lib/utils/helpers";
 import { cache } from "react"; // Import React's cache function
+import { UserDetails } from "../../types";
 
 export const getUsersFromRegex = async (regex: string) => {
   await dbConnect();
@@ -36,13 +37,18 @@ export async function createUser({
     avatar,
   });
 
-  return JSON.stringify({
+  let userDetails: UserDetails = {
     _id: user._id,
     username: user.username,
     walletAddress: user.walletAddress,
     avatar: user.avatar,
     walletType: user.walletType,
-  });
+    connectionTimestamp,
+    status: user.status,
+    pinnedChats: user.pinnedChats.map((chat) => chat.toString()),
+  };
+
+  return JSON.stringify(userDetails);
 }
 
 export const getUserByWalletAddress = async (

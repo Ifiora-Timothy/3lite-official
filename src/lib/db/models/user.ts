@@ -1,5 +1,4 @@
 import mongoose, { Model } from "mongoose";
-import bcrypt from "bcrypt";
 
 export interface Iuser {
   _id: string;
@@ -13,6 +12,7 @@ export interface Iuser {
   sentMessages: Array<mongoose.Types.ObjectId>; // Messages sent by user
   receivedMessages: Array<mongoose.Types.ObjectId>; // Messages received by user
   chats: Array<mongoose.Types.ObjectId>;
+  pinnedChats: Array<mongoose.Types.ObjectId>;
   created_at: Date;
   updated_at: Date;
 }
@@ -90,6 +90,12 @@ const UserSchema = new mongoose.Schema<Users, UserModel>(
       },
     ],
     chats: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Chat",
+      },
+    ],
+    pinnedChats: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Chat",

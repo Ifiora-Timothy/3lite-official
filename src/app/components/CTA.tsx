@@ -1,47 +1,84 @@
-import Header from "./Header";
-import CustomIcon from "./ui/CustomIcon";
+"use client";
+import React, { useState } from 'react';
+import { ArrowRight, CheckCircle } from 'lucide-react';
 
-const CTA = () => {
+const CTA: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      // In a real app, this would send the email to a server
+      setSubmitted(true);
+    }
+  };
+
   return (
-    <section className="w-full   py-12 md:py-20 lg:py-24">
-      <div className="relative w-full flex flex-col items-center justify-center space-y-3 px-5">
-        <div className="absolute size-full overflow-hidden flex items-center left-0">
-          <CustomIcon
-            name="left-circle-bg"
-            className="fill-brand"
-            width={400}
-            height={400}
-          />
-        </div>
-
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-12 relative z-10">
-          <Header title="Join 3lite" />
-        </div>
-
-        {/* Content Card */}
-        <div className="bg-white rounded-3xl shadow-lg max-w-2xl mx-auto py-10 px-6 md:px-16 md:py-16 relative z-10">
-          <div className="text-black text-center mb-8">
-            <h2 className="font-bold text-3xl md:text-4xl lg:text-5xl leading-tight mb-4">
-              Start your Project&apos;s journey with us
-            </h2>
-            <p className="text-sm md:text-base text-gray-700 max-w-lg mx-auto">
-              With a solid understanding of the Web3 world and a passion for
-              excellence, I&apos;m here to help projects succeed. Here&apos;s
-              why you should work with me:
-            </p>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="w-full sm:w-auto px-6 py-3 flex justify-center items-center gap-x-2 bg-[#C2C0F3] hover:bg-[#b2b0e3] transition-colors rounded-lg text-brand font-medium">
-              <span>Socials</span>
-              <CustomIcon name="internet" width={20} height={20} />
-            </button>
-            <button className="w-full sm:w-auto px-6 py-3 flex justify-center items-center gap-x-2 bg-brand-light hover:opacity-90 transition-opacity rounded-lg text-white font-medium">
-              <span>Book a Call</span>
-              <CustomIcon name="message" width={22} height={22} />
-            </button>
+    <section id="join-waitlist" className="py-20">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-indigo-50 to-purple-50 rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-400/10 rounded-full"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-purple-400/10 rounded-full"></div>
+          
+          <div className="relative z-10">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Join the 3lite Revolution
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Be among the first to experience the future of messaging and crypto transactions. 
+                Sign up for our waitlist and get early access.
+              </p>
+            </div>
+            
+            <div className="max-w-md mx-auto">
+              {!submitted ? (
+                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="flex-1 px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full text-white font-medium flex items-center justify-center hover:shadow-lg hover:opacity-90 transition-all whitespace-nowrap"
+                  >
+                    Join Waitlist
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </button>
+                </form>
+              ) : (
+                <div className="text-center p-4 bg-white rounded-xl shadow-sm">
+                  <div className="flex items-center justify-center mb-2">
+                    <CheckCircle className="h-8 w-8 text-green-500 mr-2" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-1">You're on the list!</h3>
+                  <p className="text-gray-600">We'll notify you when 3lite is ready for early access.</p>
+                </div>
+              )}
+              
+              <div className="mt-6 flex items-center justify-center text-sm text-gray-500">
+                <div className="flex space-x-3">
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-indigo-600 mr-1" />
+                    <span>No spam</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-indigo-600 mr-1" />
+                    <span>Early access</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-4 h-4 text-indigo-600 mr-1" />
+                    <span>Exclusive perks</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

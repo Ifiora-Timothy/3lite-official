@@ -6,7 +6,7 @@ import MediaAttachment from "./ui/MediaAttachment";
 import { MessageSquareWarning, OctagonMinus } from "lucide-react";
 
 type Props = {
-  chatType: "group" | "personal";
+  chatType: "group" | "private";
   chatData: {
     id: string;
     name: string;

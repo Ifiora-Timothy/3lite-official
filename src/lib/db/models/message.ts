@@ -15,7 +15,7 @@ export interface ImessageContent {
   receiver: mongoose.Types.ObjectId; // User who receives the message
   content: string; // Actual content of the message
   messageContentType: "text" | "image" | "file"; // Type of content in the message
-  deliveryStatus: "sent" | "delivered" | "read"; // Current delivery status
+  deliveryStatus: "sending"|"sent" | "delivered" | "read"; // Current delivery status
   deliveredAt?: Date; // When the message was delivered
   readAt?: Date; // When the message was read
   transactionHash?: string; // Optional blockchain transaction hash
@@ -41,7 +41,7 @@ export interface IpopulatedMessageContent {
   };
   content: string; // Actual content of the message
   contentType: "text" | "image" | "file"; // Type of content in the message
-  deliveryStatus: "sent" | "delivered" | "read"; // Current delivery status
+  deliveryStatus: "sending"|"sent" | "delivered" | "read"; // Current delivery status
   deliveredAt?: Date; // When the message was delivered
   readAt?: Date; // When the message was read
   createdAt: Date; // When the message was created
@@ -329,7 +329,6 @@ messageSchema.statics.addMessage = async function ({
     // Sync with Firebase for real-time updates
     if (chat) {
       await FirebaseChat.syncChat(chat);
-
       await FirebaseChat.syncMessage({
         _id: populatedMessage._id.toString(),
         chat: populatedMessage.chat.toString(),
@@ -340,6 +339,7 @@ messageSchema.statics.addMessage = async function ({
         createdAt: populatedMessage.createdAt!,
         deliveryStatus: populatedMessage.deliveryStatus,
       });
+ 
     }
 
     await session.commitTransaction();

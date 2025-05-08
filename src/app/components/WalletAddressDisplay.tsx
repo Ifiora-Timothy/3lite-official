@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ export default function WalletAddressDisplay({
   // Function to truncate wallet address
   const truncateAddress = (address: string) => {
     if (!address) return "";
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    return `${address.slice(0, 5)}...${address.slice(-3)}`;
   };
 
   // Copy wallet address to clipboard
@@ -48,7 +49,7 @@ export default function WalletAddressDisplay({
     <div className="flex items-center justify-start">
       <span
         className={cn(
-          "text-primary-foreground text-sm font-medium font-['Plus_Jakarta_Sans'] mr-2",
+          "text-primary-foreground text-xs font-medium font-['Plus_Jakarta_Sans'] mr-1",
           className
         )}
       >
@@ -56,7 +57,7 @@ export default function WalletAddressDisplay({
       </span>
       <button
         onClick={copyToClipboard}
-        className="p-1 rounded-md hover:bg-gray-700 transition-colors"
+        className="pl-[2px] rounded-md hover:bg-gray-700 transition-colors"
         title="Copy wallet address"
       >
         <Copy

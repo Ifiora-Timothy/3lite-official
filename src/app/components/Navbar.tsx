@@ -1,141 +1,93 @@
-import React from "react";
-import { navLinks } from "../../utils/constants";
-import Link from "next/link";
 
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/app/components/ui/sheet";
-import { Menu } from "lucide-react";
-import CustomIcon from "./ui/CustomIcon";
+import React, { useState, useEffect } from 'react';
+import { MessageSquare, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import WalletConnectionHandler from './WalletConnectModel';
+// import WalletConnectionHandler from './WalletButton';
+// import WalletConnectionHandler from './WalletButton';
 
-const Navbar = () => {
+
+const Navbar: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="w-full h-full bg-transparent">
-      <div className="w-full h-full bg-inherit flex justify-between items-center px-10 py-1 border-b-[1px] border-gray-700">
-        <div>
-          <div className="rounded-full overflow-hidden relative md:w-[51px] size-[51px] md:h-[51px]">
-            <CustomIcon name="logo" className="" width={51} height={51} />
-            {/* <Image src={logo} fill className="w-full h-full" alt="logo" /> */}
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-3'
+          : 'bg-transparent py-5'
+      }`}
+    >
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <MessageSquare
+              className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mr-2"
+              strokeWidth={2}
+            />
+            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              3lite Messenger
+            </span>
+          </div>
+          <div style={{
+             color: "var(--text-color)",
+          }} className="hidden md:flex space-x-8">
+            <a
+              href="#features"
+              className=" hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              className=" hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+            >
+              How It Works
+            </a>
+            <a
+              href="#why-3lite"
+              className=" hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+            >
+              Why 3lite?
+            </a>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Toggle dark mode"
+            >
+              {theme =="dark" ? (
+                <Sun className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              )}
+            </button>
+            <div
+           className='bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2  rounded-full font-medium hover:shadow-lg hover:opacity-90 transition-all'
+              
+            >
+            <WalletConnectionHandler/>
+            </div>
           </div>
         </div>
-        <div className="hidden md:flex justify-center gap-x-5 w-1/3">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.link}
-              className="text-white underline-under underline items-center gap-1  decoration-slate-400 underline-offset-2 flex  shrink-0"
-            >
-              {link.name}
-            </Link>
-          ))}
-        </div>
-        <div className="hidden md:flex">
-          <Link href="signup">
-            <div className="bg-gradient-to-r from-[#472F8C66] to-[#8A2C8F]  flex gap-x-2 px-3 py-2 rounded-full">
-              {/* <Image src={star} className="w-[20px] h-[20px]" alt="star" /> */}
-              <CustomIcon name="star" className="" width={24} height={24} />
-              <button className="capitalize text-white">
-                Get Early Access
-              </button>
-            </div>
-          </Link>
-        </div>
-
-        <div className="md:hidden ">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Menu className="stroke-white" />
-            </SheetTrigger>
-
-            <SheetContent className=" bg-[#231c4f] flex flex-col pb-3 text-white text-base   h-full shadow-lg border-0  ">
-              <SheetHeader className="h">
-                <SheetTitle>
-                  <div className="w-full  flex justify-center">
-                    {/* <Image
-                      src={logo}
-                      className="size-[70px] sm:w-[100px]"
-                      alt="logo"
-                    /> */}
-                    <CustomIcon
-                      name="logo"
-                      className=""
-                      width={24}
-                      height={24}
-                    />
-                  </div>
-                </SheetTitle>
-              </SheetHeader>
-
-              {/* <div className="bg-red-300 w-[200px] h-full"></div> */}
-              {/* <div className="relative  flex-grow bg-red-200 "></div> */}
-              <div className="relative  flex-grow  ">
-                <div
-                  className={`inset-y-4  h-full right-0   transform transition-transform duration-300 ease-in-out z-40 flex flex-col`}
-                >
-                  <nav className=" flex-grow">
-                    <div className="space-y-4 p-2 pt-7 ">
-                      {navLinks.map(({ icon: Icon, name, link }) => (
-                        <SheetClose key={name} asChild>
-                          <div className="border-purple-400 mt-6 border  rounded-full">
-                            <Link
-                              href={link}
-                              className="flex items-center space-x-6 text-gray-300 hover:text-white  rounded-lg px-4 py-3 transition-all duration-200 group"
-                            >
-                              <span className="relative">
-                                <Icon
-                                  size={20}
-                                  className="group-hover:opacity-0 transition-opacity text-white duration-200"
-                                />
-                                <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                  <span className="w-2 h-2   bg-white rounded-full"></span>
-                                </span>
-                              </span>
-                              <span className="font-medium  text-center  text-white">
-                                {name}
-                              </span>
-                            </Link>
-                          </div>
-                        </SheetClose>
-                      ))}
-                    </div>
-                  </nav>
-
-                  <div className="flex-shrink-0 pb-9 place-content-center flex text-base">
-                    <div className="min-w-[200px] w-full max-w-[300px] ">
-                      <Link
-                        href="/signup"
-                        className="bg-gradient-to-r from-[#472F8C66] to-[#8A2C8F] justify-center flex gap-x-2 px-4 py-4 rounded-full"
-                      >
-                        {/* <Image
-                          src={star}
-                          className="w-[20px] h-[20px]"
-                          alt="star"
-                        /> */}
-                        <CustomIcon
-                          name="star"
-                          className=""
-                          width={24}
-                          height={24}
-                        />
-
-                        <span className="capitalize text-white">
-                          Get Early Access
-                        </span>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
       </div>
-    </div>
+    </nav>
   );
 };
 

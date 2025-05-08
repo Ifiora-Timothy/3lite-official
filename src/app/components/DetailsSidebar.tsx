@@ -26,7 +26,7 @@ const DetailsSidebar = ({ className }: Props) => {
           //   members: ["Timothy"], // Your member data
           //   media: ["zip", "pdf"], // Your media data
           // }}
-          chatType="personal"
+          chatType="private"
           chatData={{
             id: activeUser?._id.toString() || "123",
             name: activeUser?.username ?? "User",

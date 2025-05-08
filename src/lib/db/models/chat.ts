@@ -17,14 +17,16 @@ interface group {
  */
 export interface IchatContent {
   _id: string; // Unique identifier for the chat
-  type: "private" | "group"; // Type of chat - either between two users or a group
+  type: "private" | "group"|"ai"; // Type of chat - either between two users or a group
   participants: Array<mongoose.Types.ObjectId>; // Array of user IDs participating in the chat
   messages: Array<mongoose.Types.ObjectId>; // Array of message IDs in this chat
+  unreadCount: number; // Optional count of unread messages for this chat
   lastMessage?: mongoose.Types.ObjectId; // Reference to the most recent message (for preview/sorting)
   createdAt: Date; // When the chat was created
   updatedAt: Date; // When the chat was last updated
   groupDetails?: group; // Group-specific details (only for group chats)
   contractAddress?: string; // Optional blockchain contract address (for on-chain functionality)
+
 }
 
 /**
@@ -56,7 +58,7 @@ export interface ChatModel extends Model<IChat> {
 
   // Create a new chat between users
   createChat(data: {
-    type: "private" | "group";
+    type: "private" | "group"|"ai"|"ai";
     participants: Array<string>;
   }): Promise<IChat>;
 }
@@ -89,6 +91,10 @@ const chatSchema = new mongoose.Schema(
         ref: "Message", // References Message model
       },
     ],
+    unreadCount: {
+      type: Number,
+      default: 0, // Default unread count is 0
+    },
 
     // Most recent message (for chat preview and sorting)
     lastMessage: {
@@ -182,7 +188,7 @@ chatSchema.statics.createChat = async function ({
   type,
   participants,
 }: {
-  type: "private" | "group";
+  type: "private" | "group"|"ai";
   participants: Array<string>;
 }) {
   // Start a transaction for atomicity
