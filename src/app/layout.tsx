@@ -1,5 +1,4 @@
 import { Toaster } from "sonner";
-import AppWalletProvider from "@/app/components/WalletFeature";
 import { AuthProvider } from "./providers/AuthContext";
 import { Plus_Jakarta_Sans, Poppins, SUSE, Syne } from "next/font/google";
 import { PropsWithChildren } from "react";
@@ -56,7 +55,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <ThemeProvider>
         <body
          
-          className={`${plusJakartaSans.variable} ${syne.variable} ${suse.variable} ${inter.className} ${poppins.variable} h-screen  w-screen  overflow-x-hidden dark antialiased`}
+          className={`${plusJakartaSans.variable} ${syne.variable} ${suse.variable} ${inter.className} ${poppins.variable} h-screen  w-screen  overflow-x-hidden dark  antialiased`}
         >
           <WalletConnectionProvider>
 

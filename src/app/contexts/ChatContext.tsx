@@ -48,9 +48,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(messageData);
  const [showProfile, setShowProfile] = useState(false);
   const [showChatList, setShowChatList] = useState(true);
+  
   const [isMobile, setIsMobile] = useState(false);
 
-  
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -61,6 +62,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       }
     };
 
+    handleResize(); // Initial check
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);

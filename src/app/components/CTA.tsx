@@ -57,8 +57,8 @@ const CTA: React.FC = () => {
                   <div className="flex items-center justify-center mb-2">
                     <CheckCircle className="h-8 w-8 text-green-500 mr-2" />
                   </div>
-                  <h3 className="text-xl font-bold mb-1">You're on the list!</h3>
-                  <p className="text-gray-600">We'll notify you when 3lite is ready for early access.</p>
+                  <h3 className="text-xl font-bold mb-1">You&apos;re on the list!</h3>
+                  <p className="text-gray-600">We&apos;ll notify you when 3lite is ready for early access.</p>
                 </div>
               )}
               

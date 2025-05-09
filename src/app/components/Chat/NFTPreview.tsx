@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 
 interface NFTPreviewProps {
   name: string;
@@ -37,10 +38,12 @@ const NFTPreview: React.FC<NFTPreviewProps> = ({
           }`}
           onClick={() => setExpanded(!expanded)}
         >
-          <img 
+          <Image
             src={image} 
             alt={name}
             className="w-full h-full object-cover"
+            width={expanded ? 400 : 180}
+            height={expanded ? 400 : 180}
           />
         </div>
         

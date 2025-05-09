@@ -276,14 +276,10 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
    * Uses optimistic updates for immediate UI feedback
    */
   const handleSend = async () => {
-    console.log("Sending message1:");
+ 
     if (!inputRef.current || !activeChat?.username || !user?._id) return;
-
-    console.log("Sending message2:", inputRef.current.value);
-    const message = inputRef.current.value.trim();
+  const message = inputRef.current.value.trim();
     if (!message) return;
-
-    console.log("Sending message3:", message);
 
     // Generate temporary ID for optimistic update
     const tempId = new mongoose.Types.ObjectId().toString();
@@ -351,7 +347,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
   };
 
    const getAllChats = async ():Promise<null|IPopulatedChat[]> => {
-    console.log("user",user)
+ 
       if (!user?._id) return null;
       try {
        

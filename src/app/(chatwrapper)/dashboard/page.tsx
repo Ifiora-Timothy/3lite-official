@@ -2,7 +2,7 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownLeft, Wallet, Award } from 'lucide-react';
 import Button from "@/app/UI/Button";
-import TransferModal from '../Transfer/TransferModal';
+import TransferModal from '../../modals/TransferModal';
 
 const Dashboard: React.FC = () => {
   const [showTransferModal, setShowTransferModal] = React.useState(false);

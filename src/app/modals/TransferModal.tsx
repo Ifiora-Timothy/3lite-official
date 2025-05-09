@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
-import { X, Send, Clock } from 'lucide-react';
-import Button from '../UI/Button';
-import Avatar from '../UI/Avatar';
-import { Chat } from '@/types';
+"use client"
+import React, { useState } from "react";
+import { X, Send, Clock } from "lucide-react";
+import Button from "@/app/UI/Button";
+import Avatar from "@/app/UI/Avatar";
 
 interface TransferModalProps {
-  recipient: Chat;
   onClose: () => void;
 }
 
-const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => {
+const TransferModal: React.FC<TransferModalProps> = ({ onClose }) => {
   const [step, setStep] = useState(1);
-  const [selectedToken, setSelectedToken] = useState('ETH');
-  const [amount, setAmount] = useState('');
-  const [memo, setMemo] = useState('');
+  const [selectedToken, setSelectedToken] = useState("ETH");
+  const [amount, setAmount] = useState("");
+  const [memo, setMemo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
+
+  const { activeChat: recipient } = useChat();
+  if (!recipient) {
+    return (
+      <div className="">
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">No active chat found</p>
+        </div>
+      </div>
+    );
+  }
+
   const tokens = [
-    { symbol: 'ETH', name: 'Ethereum', balance: '1.45', icon: '⧫' },
-    { symbol: 'USDT', name: 'Tether', balance: '245.50', icon: '₮' },
-    { symbol: 'MATIC', name: 'Polygon', balance: '156.78', icon: '◆' },
-    { symbol: '3LITE', name: '3lite Token', balance: '340.00', icon: '✦' },
+    { symbol: "ETH", name: "Ethereum", balance: "1.45", icon: "⧫" },
+    { symbol: "USDT", name: "Tether", balance: "245.50", icon: "₮" },
+    { symbol: "MATIC", name: "Polygon", balance: "156.78", icon: "◆" },
+    { symbol: "3LITE", name: "3lite Token", balance: "340.00", icon: "✦" },
   ];
-  
+
   const handleContinue = () => {
     if (step === 1) {
       setStep(2);
@@ -36,12 +46,12 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
       }, 2000);
     }
   };
-  
+
   const handleReset = () => {
     setStep(1);
-    setSelectedToken('ETH');
-    setAmount('');
-    setMemo('');
+    setSelectedToken("ETH");
+    setAmount("");
+    setMemo("");
     setIsSuccess(false);
   };
 
@@ -50,9 +60,9 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
       <div className="glass-effect w-full max-w-md rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">
-            {isSuccess ? 'Transfer Complete' : 'Send Crypto Assets'}
+            {isSuccess ? "Transfer Complete" : "Send Crypto Assets"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-1 hover:bg-hover-bg rounded-full"
             aria-label="Close"
@@ -60,7 +70,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
             <X size={20} />
           </button>
         </div>
-        
+
         {isSuccess ? (
           <div className="text-center my-8">
             <div className="mx-auto w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
@@ -70,21 +80,13 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
               Transaction Successful!
             </h3>
             <p className="opacity-70 mb-6">
-              You sent {amount} {selectedToken} to {recipient.name}
+              You sent {amount} {selectedToken} to {recipient.username}
             </p>
             <div className="flex flex-col gap-2">
-              <Button 
-                variant="primary" 
-                fullWidth 
-                onClick={handleReset}
-              >
+              <Button variant="primary" fullWidth onClick={handleReset}>
                 Send Another
               </Button>
-              <Button 
-                variant="ghost" 
-                fullWidth 
-                onClick={onClose}
-              >
+              <Button variant="ghost" fullWidth onClick={onClose}>
                 Close
               </Button>
             </div>
@@ -94,31 +96,35 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
             {/* Recipient */}
             <div className="glass-effect rounded-lg p-3 mb-5 flex items-center gap-3">
               <Avatar
-                name={recipient.name}
+                name={recipient.username}
                 src={recipient.avatar}
                 status={recipient.status}
-                walletAddress={recipient.address}
+                walletAddress={recipient.walletAddress}
               />
               <div>
-                <h3 className="font-medium">{recipient.name}</h3>
+                <h3 className="font-medium">{recipient.username}</h3>
                 <p className="text-xs opacity-70">
-                  {recipient.address || 'Wallet connected'}
+                  {recipient.walletAddress || "Wallet connected"}
                 </p>
               </div>
             </div>
-            
+
             {step === 1 ? (
               <>
                 {/* Token Selection */}
                 <div className="mb-5">
                   <h3 className="font-medium mb-3">Select Token</h3>
                   <div className="space-y-2">
-                    {tokens.map(token => (
+                    {tokens.map((token) => (
                       <div
                         key={token.symbol}
                         className={`
                           glass-effect rounded-lg p-3 cursor-pointer flex items-center justify-between
-                          ${selectedToken === token.symbol ? 'glow-border' : 'hover:bg-hover-bg'}
+                          ${
+                            selectedToken === token.symbol
+                              ? "glow-border"
+                              : "hover:bg-hover-bg"
+                          }
                         `}
                         onClick={() => setSelectedToken(token.symbol)}
                       >
@@ -155,12 +161,12 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
                     />
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-primary-color/20 flex items-center justify-center text-lg">
-                        {tokens.find(t => t.symbol === selectedToken)?.icon}
+                        {tokens.find((t) => t.symbol === selectedToken)?.icon}
                       </div>
                       <span className="font-medium">{selectedToken}</span>
                     </div>
                   </div>
-                  
+
                   <h3 className="font-medium mb-2">Memo (Optional)</h3>
                   <div className="glass-effect rounded-lg p-3 mb-4">
                     <input
@@ -171,7 +177,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
                       onChange={(e) => setMemo(e.target.value)}
                     />
                   </div>
-                  
+
                   <div className="glass-effect rounded-lg p-3 flex justify-between text-sm">
                     <span className="opacity-70">Transaction Fee</span>
                     <span className="font-medium">~0.0005 ETH</span>
@@ -179,14 +185,10 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
                 </div>
               </>
             )}
-            
+
             <div className="flex gap-3">
               {step === 2 && (
-                <Button
-                  variant="ghost"
-                  fullWidth
-                  onClick={() => setStep(1)}
-                >
+                <Button variant="ghost" fullWidth onClick={() => setStep(1)}>
                   Back
                 </Button>
               )}
@@ -195,9 +197,19 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
                 fullWidth
                 disabled={step === 2 && !amount}
                 onClick={handleContinue}
-                icon={isLoading ? <Clock size={18} className="animate-spin" /> : <Send size={18} />}
+                icon={
+                  isLoading ? (
+                    <Clock size={18} className="animate-spin" />
+                  ) : (
+                    <Send size={18} />
+                  )
+                }
               >
-                {step === 1 ? 'Continue' : isLoading ? 'Processing...' : 'Send Now'}
+                {step === 1
+                  ? "Continue"
+                  : isLoading
+                  ? "Processing..."
+                  : "Send Now"}
               </Button>
             </div>
           </>
@@ -208,6 +220,7 @@ const TransferModal: React.FC<TransferModalProps> = ({ recipient, onClose }) => 
 };
 
 // Missing import
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle } from "lucide-react";
+import { useChat } from "@/app/contexts/ChatContext";
 
 export default TransferModal;

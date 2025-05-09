@@ -15,7 +15,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { createUser } from "@/actions/dbFunctions";
 import useAuth from "../hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { uploadImage } from "@/actions/severFunctions";
+import { uploadImage } from "@/actions/serverFunctions";
 import Image from "next/image";
 import { toast } from "sonner";
 

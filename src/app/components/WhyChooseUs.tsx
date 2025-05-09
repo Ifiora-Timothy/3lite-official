@@ -17,7 +17,7 @@ const WhyChooseUs: React.FC = () => {
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Why Choose 3lite?</h2>
             <p className="text-indigo-100 mb-8 text-lg">
-              3lite Messenger isn't just another messaging app. We've reimagined communication for the crypto era.
+              3lite Messenger isn&apos;t just another messaging app. We&apos;ve reimagined communication for the crypto era.
             </p>
             
             <div className="space-y-4">
@@ -40,7 +40,7 @@ const WhyChooseUs: React.FC = () => {
               <div className="space-y-6">
                 <div className="p-4 bg-white/5 rounded-xl">
                   <p className="italic text-indigo-100 mb-3">
-                    "3lite has completely changed how I interact with my crypto-holding friends. Sending ETH is now as simple as sending a message!"
+                  &ldquo;3lite has completely changed how I interact with my crypto-holding friends. Sending ETH is now as simple as sending a message!&rdquo;
                   </p>
                   <div className="flex items-center">
                     <div className="w-8 h-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-800 font-medium mr-3">
@@ -52,7 +52,7 @@ const WhyChooseUs: React.FC = () => {
                 
                 <div className="p-4 bg-white/5 rounded-xl">
                   <p className="italic text-indigo-100 mb-3">
-                    "As someone working in Web3, I needed a communication tool that understood crypto. 3lite is exactly what I was looking for."
+                  &ldquo;As someone working in Web3, I needed a communication tool that understood crypto. 3lite is exactly what I was looking for.&rdquo;
                   </p>
                   <div className="flex items-center">
                     <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-purple-800 font-medium mr-3">

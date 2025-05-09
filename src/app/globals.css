@@ -33,8 +33,9 @@ body {
 
 button.wallet-adapter-button {
   height: 40px;
-  @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-0 rounded-full font-medium hover:shadow-lg hover:opacity-90 transition-all; 
+  @apply bg-gradient-to-r text-sm  from-indigo-600 to-purple-600 text-white px-3 py-0 rounded-full font-medium hover:shadow-lg hover:opacity-90 transition-all; 
 }
+
 
 .theme-dark {
   --text-color: var(--light-text);

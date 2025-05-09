@@ -1,11 +1,9 @@
-
+"use client";
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import WalletConnectionHandler from './WalletConnectModel';
-// import WalletConnectionHandler from './WalletButton';
-// import WalletConnectionHandler from './WalletButton';
+import WalletConnectionHandler from './WalletButton';
+
 
 
 const Navbar: React.FC = () => {
@@ -79,7 +77,7 @@ const Navbar: React.FC = () => {
               )}
             </button>
             <div
-           className='bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2  rounded-full font-medium hover:shadow-lg hover:opacity-90 transition-all'
+          //  className='bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2  rounded-full font-medium hover:shadow-lg hover:opacity-90 transition-all'
               
             >
             <WalletConnectionHandler/>

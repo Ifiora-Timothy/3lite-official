@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 
 interface AvatarProps {
@@ -50,10 +51,12 @@ const Avatar: React.FC<AvatarProps> = ({
   return (
     <div className="relative inline-flex">
       {src ? (
-        <img
+        <Image
           src={src}
           alt={name}
           className={`${sizeClass} rounded-full object-cover glow-border`}
+          width={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 56 : 80}
+          height={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 56 : 80}
         />
       ) : (
         <div

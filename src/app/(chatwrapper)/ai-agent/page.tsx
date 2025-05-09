@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Brain, RefreshCw } from 'lucide-react';
+import React, { useState, useRef, useEffect, } from 'react';
+import { Send, Brain, RefreshCw, Image, Newspaper  } from 'lucide-react';
 import Button from '@/app/UI/Button';
 import Avatar from '@/app/UI/Avatar';
 import { ChatMessage } from '@/types';
+import { useChat } from '@/app/contexts/ChatContext';
 
 const AIAgent: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -23,6 +24,7 @@ const AIAgent: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
+  const {isMobile,showChatList}= useChat();
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -102,8 +104,10 @@ const AIAgent: React.FC = () => {
     { label: 'Crypto News', icon: <Newspaper size={16} /> },
   ];
 
+  const maxWidth = isMobile ? 'w-[calc(100vw-64px)]' : '';
+
   return (
-    <div className="h-full flex flex-col">
+    <div className={`h-full  flex flex-col ${maxWidth}`}>
       <div className="glass-effect p-4 border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-accent-color/20 flex items-center justify-center">
@@ -216,7 +220,7 @@ const AIAgent: React.FC = () => {
           </div>
           
           <p className="text-xs opacity-50 mt-2 text-center">
-            Try commands like "Send 5 ETH to Taylor" or "Show me my NFT gallery"
+            Try commands like &ldquo;Send 5 ETH to Taylor&rdquo; or &ldquo;Show me my NFT gallery&rdquo;
           </p>
         </div>
       </div>
@@ -224,7 +228,5 @@ const AIAgent: React.FC = () => {
   );
 };
 
-// Missing imports
-import { Image, Newspaper } from 'lucide-react';
 
 export default AIAgent;

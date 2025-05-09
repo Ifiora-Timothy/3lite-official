@@ -4,9 +4,11 @@ import React from "react";
 import { ArrowRight, MessageSquare, Wallet } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { SolflareWalletName } from "@solana/wallet-adapter-solflare";
+import { useRouter } from "next/navigation";
 
 const Hero: React.FC = () => {
-  const { connect,select } = useWallet();
+  const { connect,select,connected } = useWallet();
+  const router= useRouter();
   return (
     <section className="pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
       <div className="container mx-auto px-4 md:px-8">
@@ -25,6 +27,10 @@ const Hero: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4">
             <button
                  onClick={async () => {
+                  if (connected) {
+                    router.push("/chat");
+                    return;
+                  }
                   select(SolflareWalletName);
                 }}
                 
@@ -74,18 +80,18 @@ const Hero: React.FC = () => {
                   </div>
                   <div className="p-4">
                     <div className="flex items-start mb-4">
-                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0  text-dark-text">
                         A
                       </div>
-                      <div className="bg-gray-100 rounded-2xl rounded-tl-none p-3 max-w-[80%]">
-                        <p className="text-sm">Hey! Can you send me 0.5 ETH?</p>
+                      <div className="bg-gray-300 bg-dark-bg  rounded-2xl rounded-tl-none p-3 max-w-[80%]">
+                        <p className="text-sm text-dark-text">Hey! Can you send me 0.5 ETH?</p>
                       </div>
                     </div>
                     <div className="flex items-start justify-end mb-4">
                       <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[80%]">
                         <p className="text-sm">Sure, sending it now! 👍</p>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center ml-3 flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full  text-dark-text bg-indigo-100 flex items-center justify-center ml-3 flex-shrink-0">
                         B
                       </div>
                     </div>
@@ -93,7 +99,7 @@ const Hero: React.FC = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-xs text-gray-500">SENDING</p>
-                          <p className="font-medium">0.5 ETH</p>
+                          <p className="font-medium  text-dark-text">0.5 ETH</p>
                         </div>
                         <div className="bg-green-100 text-green-700 text-xs py-1 px-2 rounded-full">
                           Confirmed

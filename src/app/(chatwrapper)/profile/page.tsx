@@ -3,16 +3,11 @@ import React from 'react';
 import { X, Edit, ExternalLink, Copy, Grid } from 'lucide-react';
 import Button from '@/app/UI/Button';
 import Avatar from '@/app/UI/Avatar';
+import { Send } from 'lucide-react';
+import useAuth from '@/app/hooks/useAuth';
 
-interface ProfilePanelProps {
-  onClose?: () => void;
-  isFullPage?: boolean;
-}
 
-const ProfilePanel: React.FC<ProfilePanelProps> = ({ 
-  onClose, 
-  isFullPage = false 
-}) => {
+const ProfilePanel= () => {
   const { activeUser } = useAuth();
   if (!activeUser) {
   //noactiveUser
@@ -36,6 +31,10 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
     nftCount: 6
   };
 
+  const isFullPage = true; // This can be a prop or state to determine if it's full page or not
+  const onClose = () => {
+    // Handle close action
+  };
   return (
     <div 
       className={`glass-effect h-full flex flex-col ${
@@ -145,8 +144,6 @@ const ProfilePanel: React.FC<ProfilePanelProps> = ({
   );
 };
 
-// Missing import
-import { Send } from 'lucide-react';
-import useAuth from '@/app/hooks/useAuth';
+
 
 export default ProfilePanel;

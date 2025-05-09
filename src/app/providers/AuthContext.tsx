@@ -56,6 +56,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     const initAuth = async () => {
       setIsLoading(true);
+
+      
       
       // First try to get user from localStorage
       const storedUser = localStorage.getItem("3liteuser");

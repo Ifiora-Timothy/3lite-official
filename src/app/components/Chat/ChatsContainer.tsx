@@ -1,11 +1,10 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Image, SmilePlus, User, PlusCircle, ChevronLeft } from 'lucide-react';
+import { Send, Image as ImageIcon, SmilePlus, User, PlusCircle, ChevronLeft } from 'lucide-react';
 import { useChat } from '@/app/contexts/ChatContext';
 import Button from '@/app/UI/Button';
 import MessageBubble from '@/app/components/Chat/MessageBubble';
 import NFTPreview from '@/app/components/Chat/NFTPreview';
-import TransferModal from '@/app/modals/TransferModal';
 import Avatar from '@/app/UI/Avatar';
 
 interface ChatWindowProps {
@@ -97,6 +96,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
             size="sm" 
             icon={<User size={18} />} 
             onClick={onViewProfile}
+            className='hidden md:flex'
           >
             Profile
           </Button>
@@ -142,7 +142,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
           setMessageInput("");
         }}
          className="glass-effect p-4 border-t border-white/10">
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-1 md:gap-2">
           <div className="flex-1">
             <textarea
               className="glass-effect w-full p-3 rounded-xl focus:outline-none focus:glow-border resize-none min-h-[60px]"
@@ -154,13 +154,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
               rows={1}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 md:gap-2">
             <Button 
               variant="ghost" 
               size="sm" 
               type='button'
-              icon={<Image size={20} />}
+              icon={<ImageIcon size={20} />}
               aria-label="Attach file"
+              className=''
             />
             <Button 
               variant="ghost" 
@@ -183,7 +184,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
       {/* Transfer Modal */}
       {showTransferModal && (
         <TransferModal 
-          recipient={activeChat} 
           onClose={() => setShowTransferModal(false)} 
         />
       )}
@@ -195,5 +195,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
 import { MessageSquare } from 'lucide-react';
 import WalletAddressDisplay from '../WalletAddressDisplay';
 import { useChatContext } from '@/app/hooks/useChatContext';
+import TransferModal from '@/app/modals/TransferModal';
 
 export default ChatWindow;
