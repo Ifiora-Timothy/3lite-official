@@ -10,14 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        plusJakartaSans: [
-          "var(--font-plus-jakarta-sans)",
-          "ui-serif",
-          "Georgia",
-        ],
-        poppins: ["var(--font-poppins)", "ui-serif", "Georgia"],
-        syne: ["var(--font-syne)", "ui-serif", "Georgia"],
-        suse: ["var(--font-suse)", "ui-serif", "Georgia"],
+      spaceGrotesk: ["var(--font-space-grotesk)"],
         sans: [
           'Inter',
           'system-ui',

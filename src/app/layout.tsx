@@ -1,34 +1,12 @@
 import { Toaster } from "sonner";
 import { AuthProvider } from "./providers/AuthContext";
-import { Plus_Jakarta_Sans, Poppins, SUSE, Syne } from "next/font/google";
 import { PropsWithChildren } from "react";
 import "./globals.css";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { WalletConnectionProvider } from "./contexts/WalletProvider";
 import { Metadata, Viewport } from "next";
-import { Inter } from 'next/font/google';
+import { Space_Grotesk } from 'next/font/google';
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
-  subsets: ["latin", "cyrillic-ext", "latin-ext", "vietnamese"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["greek", "latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
-const suse = SUSE({
-  variable: "--font-suse",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata:Metadata = {
   title: "3LiteMessenger - Secure and Private Messaging",
@@ -44,10 +22,13 @@ export const viewport:Viewport = {
 
 }
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-});
+
+const spaceGrotesk= Space_Grotesk({
+  subsets: ['latin',"vietnamese"],
+  weight: ['300','400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-space-grotesk',
+})
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
@@ -55,7 +36,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <ThemeProvider>
         <body
          
-          className={`${plusJakartaSans.variable} ${syne.variable} ${suse.variable} ${inter.className} ${poppins.variable} h-screen  w-screen  overflow-x-hidden dark  antialiased`}
+          className={`  ${spaceGrotesk.className}  h-screen  w-screen  overflow-x-hidden dark  antialiased`}
         >
           <WalletConnectionProvider>
 
