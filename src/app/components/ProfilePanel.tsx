@@ -5,8 +5,6 @@ import Avatar from "../UI/Avatar";
 
 const ProfilePanel = () => {
   const { showProfile, activeChat, setShowProfile } = useChat();
-
-  console.log({ activeChat });
   const user = {
     name: activeChat?.username ?? "0x00",
     address:

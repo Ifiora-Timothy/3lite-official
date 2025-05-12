@@ -14,12 +14,12 @@ import { useDebouncedCallback } from "use-debounce";
 import { getUsersFromRegex } from "@/actions/dbFunctions";
 import { Chat } from "@/types";
 
-import {useRouter,  useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from "next/navigation";
 const ChatList = () => {
   const { activeUser: user } = useAuth();
   const { chats } = useChat();
-    const searchParams = useSearchParams();
-    const router = useRouter();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const updateSearchParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -27,16 +27,16 @@ const ChatList = () => {
     router.push(`?${params.toString()}`);
   };
 
-
   // Move all useState declarations to the top
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Chat[]>([]);
 
-  const currFilter = searchParams.get("filter")?? "all";
-  
-  type Ifilter= "all" | "pinned" | "ai" | "group";
-  const [activeFilter, setActiveFilter] = useState<Ifilter>(currFilter as Ifilter);
-  
+  const currFilter = searchParams.get("filter") ?? "all";
+
+  type Ifilter = "all" | "pinned" | "ai" | "group";
+  const [activeFilter, setActiveFilter] = useState<Ifilter>(
+    currFilter as Ifilter
+  );
 
   const { currChats } = useChatContext();
 
@@ -48,11 +48,8 @@ const ChatList = () => {
   );
 
   const handleFilterChange = (filter: "all" | "pinned" | "ai" | "group") => {
-    
     updateSearchParam("filter", filter);
     setActiveFilter(filter);
-
-    
   };
   const filteredChats = renderedChats.filter((chat) => {
     if (activeFilter === "all") {
@@ -65,13 +62,9 @@ const ChatList = () => {
       return chat.type === "group";
     }
     return false;
-  }
-  );
-
-
+  });
 
   const debounced = useDebouncedCallback(async (userRegex: string) => {
-
     try {
       const chats = await getUsersFromRegex(userRegex);
       const parsedResults: Chat[] = JSON.parse(chats).filter((chat: any) => {
@@ -85,13 +78,11 @@ const ChatList = () => {
         return;
       }
 
-    
-
       setSearchResults(parsedResults);
     } catch (error) {
       console.error("Error searching users:", error);
-     setSearchResults([]);
-    } 
+      setSearchResults([]);
+    }
   }, 300);
 
   const handleType = (userRegex: string) => {
@@ -101,7 +92,6 @@ const ChatList = () => {
       return;
     }
     debounced(userRegex);
-
   };
 
   return (
@@ -161,7 +151,6 @@ const ChatList = () => {
         ) : (
           <div className="space-y-2 overflow-x-auto h-full">
             {filteredChats.map((chat) => (
-
               <ChatListItem key={chat._id} chat={chat} />
             ))}
           </div>

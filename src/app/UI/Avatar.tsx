@@ -24,7 +24,6 @@ const Avatar: React.FC<AvatarProps> = ({
       return `${walletAddress.substring(0, 2)}..${walletAddress.substring(walletAddress.length - 2)}`;
     }
     
-    console.log({src})
     return name
       .split(' ')
       .map(part => part.charAt(0))

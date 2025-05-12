@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageSquare, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import WalletConnectionHandler from './WalletButton';
+import Image from 'next/image';
 
 
 
@@ -34,9 +35,13 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <MessageSquare
-              className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mr-2"
-              strokeWidth={2}
+      
+            <Image
+              src="/logo.png"
+              alt="3lite Messenger Logo"
+              width={40}
+              height={40}
+              className="rounded-full size-8 mr-2"
             />
             <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               3lite Messenger
