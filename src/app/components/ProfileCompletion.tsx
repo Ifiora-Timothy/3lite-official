@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, RefObject } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,76 +18,9 @@ import { useRouter } from "next/navigation";
 import { uploadImage } from "@/actions/serverFunctions";
 import Image from "next/image";
 import { toast } from "sonner";
+import { handleOutsideClick, processImage } from "@/lib/utils/helpers";
 
-// Image processing function to resize and compress images
-function processImage(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new window.Image();
-      img.onload = () => {
-        // Create canvas for resizing
-        const canvas = document.createElement("canvas");
-        // Set max dimensions to 600x600
-        const MAX_WIDTH = 600;
-        const MAX_HEIGHT = 600;
 
-        let width = img.width;
-        let height = img.height;
-
-        // Resize image if it exceeds max dimensions
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("Could not get canvas context"));
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convert to blob with quality adjustment
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error("Failed to create blob"));
-              return;
-            }
-            // Create a new file from the blob
-            const resizedFile = new File([blob], file.name, {
-              type: "image/jpeg",
-              lastModified: Date.now(),
-            });
-            resolve(resizedFile);
-          },
-          "image/jpeg",
-          0.85
-        ); // Adjust quality (0.85 gives good balance)
-      };
-      img.onerror = () => {
-        reject(new Error("Failed to load image"));
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.onerror = () => {
-      reject(new Error("Failed to read file"));
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
 export default function ProfileSetupModal({
   isOpen,
@@ -122,11 +55,7 @@ export default function ProfileSetupModal({
     setIsOpen(false);
   };
 
-  const handleOutsideClick = async (e: React.MouseEvent) => {
-    if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
-      await handleClose();
-    }
-  };
+
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
@@ -199,7 +128,7 @@ export default function ProfileSetupModal({
       if (profileImage) {
         formData.append("profile", profileImage);
       }
-      const imageUrl = JSON.parse(await uploadImage(formData)).url;
+      const imageUrl = profileImage?JSON.parse(await uploadImage(formData)).url:"/user.png";
 
       if (!walletDetails.walletAddress) {
         throw new Error("Wallet address is undefined");
@@ -230,7 +159,7 @@ export default function ProfileSetupModal({
     <AlertDialog open={isOpen}>
       <AlertDialogOverlay
         className="bg-black/80"
-        onClick={handleOutsideClick}
+        onClick={(event) => handleOutsideClick(event, contentRef, handleClose)}
       />
       <AlertDialogContent
         ref={contentRef}

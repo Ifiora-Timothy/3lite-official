@@ -1,18 +1,39 @@
 "use server";
 import dbConnect from "@/lib/db/dbConnect";
-import { Chat } from "@/lib/db/models/chat";
+import { Chat, IChat, IPopulatedChat } from "@/lib/db/models/chat";
 import { Message } from "@/lib/db/models/message";
-import { User } from "@/lib/db/models/user";
+import { Iuser, User } from "@/lib/db/models/user";
 import { escapeRegex } from "@/lib/utils/helpers";
 import { cache } from "react"; // Import React's cache function
-import { UserDetails } from "../../types";
+import { group, UserDetails } from "../types";
+import { Chat as TChat } from "@/types";
 
 export const getUsersFromRegex = async (regex: string) => {
   await dbConnect();
+
+
   const filteredTest = escapeRegex(regex);
   const resp = await User.getUsersFromRegex({ regex: filteredTest });
+  if (!resp || resp.length === 0) {
+    throw new Error("No users found");
+  }
+  const users:TChat[] = resp.map((user) => {
+    return {
+      _id: user._id,
+      username: user.username,
+      avatar: user.avatar || "", // Provide default empty string if avatar is undefined
+      lastMessage: "no chat yet",
+      walletAddress: user.walletAddress,
+      type: "private" as const,
+      updatedAt: new Date().toISOString(),
+      status: user.status,
+      unreadCount: 0,
+      pinned:false
+    };
+  });
 
-  return JSON.stringify(resp);
+
+  return JSON.stringify(users);
 };
 
 export async function createUser({
@@ -82,13 +103,90 @@ export const createChat = async ({
   });
   return JSON.stringify(chat);
 };
+export const createGroupChat = async ({
+  groupDetails,
+  participants,
+}: {
+  groupDetails: group;
+  participants: Array<string>;
+}) => {
+  await dbConnect();
+  const chat = await Chat.createGroupChat({
+    type: "group",
+    groupDetails,
+    participants,
+  });
+  return JSON.stringify(chat);
+};
 
 // Cache the getChats function to avoid unnecessary fetches
 export const getChats = cache(async (userId: string): Promise<string> => {
   await dbConnect();
   try {
+    let parsedChats: TChat[] = [];
     const chats = await Chat.getChats({ userId });
-    return JSON.stringify(chats);
+    if (!chats || chats.length === 0) {
+      throw new Error("No chats found");
+    }
+    
+   
+    const groupChats = chats.filter(
+      (chat) => chat.type === "group" && chat.participants.length > 2
+    );
+    const personalChats = chats.filter(
+      (chat) => chat.type === "private" && chat.participants.length === 2
+    );
+    const renderedGroupChats = groupChats.map((groupChat) => {
+      if (!groupChat.groupDetails) {
+        throw new Error("Group details are missing");
+      }
+      return {
+        _id: groupChat._id,
+        username: groupChat.groupDetails.groupName,
+        avatar: groupChat.groupDetails.groupAvatar || "", // Provide default empty string if avatar is undefined
+        lastMessage: groupChat.lastMessage?.content ?? "no chat yet",
+        walletAddress: groupChat.groupDetails.groupDescription || "",
+        type: "group" as const,
+        updatedAt: groupChat.updatedAt.toISOString(),
+        status: "online" as const,
+        unreadCount: groupChat.unreadCount,
+        pinned: false,
+      };
+    }
+    );
+    const renderedPersonalChats = personalChats.map((personalChat) => {
+      const otherParticipant = personalChat.participants.find(
+        (participant) => participant._id.toString() !== userId
+      )!;
+    
+
+      return {
+        _id: otherParticipant._id,
+        username: otherParticipant.username,
+        avatar: otherParticipant.avatar || "", // Provide default empty string if avatar is undefined
+        lastMessage: personalChat.lastMessage?.content ?? "no chat yet",
+        walletAddress: otherParticipant.walletAddress,
+        type: "private" as const,
+        updatedAt: personalChat.updatedAt.toISOString(),
+        status: otherParticipant.status,
+        unreadCount: personalChat.unreadCount,
+        pinned:
+          otherParticipant.pinnedChats?.some(
+            (chatId) => chatId.toString() === personalChat._id.toString()
+          ) ?? false,
+      };
+    });
+    // parsedChats = [...renderedGroupChats, ...renderedPersonalChats];
+  // sort the final chats by updatedAt
+    parsedChats = [...renderedGroupChats, ...renderedPersonalChats].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+
+
+    // unpopulate the participants and groupDetails fields 
+
+
+    return JSON.stringify(parsedChats);
   } catch (err) {
     console.error({ err });
     throw new Error("No chats found");
@@ -97,10 +195,19 @@ export const getChats = cache(async (userId: string): Promise<string> => {
 
 // Cache the getChat function to avoid unnecessary fetches when switching between users
 export const getChat = cache(
-  async (userId: string, user2Id: string): Promise<string> => {
+  async (
+    type: "private" | "group" | "ai",
+    userId: string,
+    user2Id: string
+  ): Promise<string> => {
     await dbConnect();
     try {
-      const chat = await Chat.getChat({ userId, user2Id });
+      let chat: IChat = {} as IChat;
+      if (type === "private") {
+        chat = await Chat.getChat({ userId, user2Id });
+       } else {
+        chat = await Chat.getGroupChat({ chatId: user2Id });
+      }
 
       return JSON.stringify(chat);
     } catch (err) {
@@ -137,6 +244,7 @@ export const addMessage = async ({
   receiver,
   createdAt,
   message,
+  type,
 }: {
   chatId: string | null;
   sender: string;
@@ -144,6 +252,7 @@ export const addMessage = async ({
   receiver: string;
   createdAt: Date;
   message: string;
+  type: "private" | "group" | "ai";
 }) => {
   await dbConnect();
   const resp = await Message.addMessage({
@@ -154,6 +263,7 @@ export const addMessage = async ({
     receiver,
     content: message,
     contentType: "text",
+    type,
   });
   return JSON.stringify(resp);
 };

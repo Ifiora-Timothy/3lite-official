@@ -1,8 +1,7 @@
 import React from 'react';
-import { Check, CheckCheck } from 'lucide-react';
+import { Check, CheckCheck,ClockFading } from 'lucide-react';
 import Avatar from '@/app/UI/Avatar';
-import { ChatMessage } from '@/types';
-import { IMessage } from '../../../../types';
+import { IMessage } from '../../../types';
 import useAuth from '@/app/hooks/useAuth';
 
 interface MessageBubbleProps {
@@ -30,6 +29,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message,type }) => {
       return <CheckCheck size={14} className="text-gray-400" />;
     } else if (message.deliveryStatus === 'read') {
       return <CheckCheck size={14} className="text-primary-color" />;
+    }
+    else{
+      return <ClockFading size={14} className="text-gray-400" />;
     }
     return null;
   };

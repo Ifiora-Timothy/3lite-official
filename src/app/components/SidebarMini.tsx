@@ -14,9 +14,9 @@ export default function SidebarMini() {
   return (
     <VerticalLayout
       header={
-        <Link href="/">
+        <Link  href="/">
 
-        <div className="w-full pt-3  place-items-center ">
+        <div  className="w-full pt-3  place-items-center ">
           <div className=" w-fit ">
             <Logo size={32} />
           </div>

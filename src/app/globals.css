@@ -15,10 +15,16 @@
   --light-text: #FFFFFF;
   --dark-text: #0A0F1C;
   --light-bg: #FFFFFF;
+  --light-scrollbar: #F3F4F6;
+  --dark-scrollbar: #374151;
+  --light-scrollbar-border: #E5E7EB;
+  --dark-scrollbar-border: #4B5563;
+  --dark-scrollbar: #374151;
   --border-radius: 8px;
   --transition-speed: 0.2s;
   --theme-transition: background-color 0.2s ease, color 0.2s ease;
   --radius: 0.5rem;
+
 }
 * {
   box-sizing: border-box;
@@ -44,6 +50,9 @@ button.wallet-adapter-button {
   --sidebar-bg: rgba(15, 23, 42, 0.7);
   --card-bg: rgba(30, 41, 59, 0.7);
   --hover-bg: rgba(51, 65, 85, 0.5);
+  --scrollbar-bg: var(--dark-scrollbar);
+  --scrollbar-border: var(--dark-scrollbar-border);
+
 }
 
 .theme-light {
@@ -53,6 +62,8 @@ button.wallet-adapter-button {
   --sidebar-bg: rgba(241, 245, 249, 0.7);
   --card-bg: rgba(248, 250, 252, 0.7);
   --hover-bg: rgba(226, 232, 240, 0.5);
+  --scrollbar-bg: var(--light-scrollbar);
+  --scrollbar-border: var(--light-scrollbar-border);
 }
 
 .glass-effect {
@@ -110,3 +121,22 @@ button.wallet-adapter-button {
 .ai-message {
   animation-delay: 0.3s;
 }
+
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  /* background: #f1f1f1; */
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-bg);
+  /* background-color: #888; */
+  border-radius: 10px;
+  border: 3px solid var(--scrollbar-border);
+}
+

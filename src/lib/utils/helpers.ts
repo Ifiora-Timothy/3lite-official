@@ -1,6 +1,6 @@
 import { Chat } from "@/types";
-import { UserDetails } from "../../../types";
-import { IPopulatedChat } from "../db/models/chat";
+import { UserDetails } from "../../types";
+import { RefObject } from "react";
 
 export const validateUserInput = (input: string[]) => {
   let valid = true;
@@ -16,88 +16,124 @@ export function escapeRegex(text: string): string {
 }
 
 export function getPersonalandGroupChats(
-  currChats: IPopulatedChat[],
+  currChats: Chat[],
   searchQuery: string,
-  searchResults: UserDetails[],
+  searchResults: Chat[],
   user: UserDetails | null
-): [
-  any,
-  Chat[]
-] {
-
-
+): Chat[] {
   const groupChats = currChats.filter(
-    (chat) => chat.type === "group" && chat.participants.length > 2
+    (chat) => chat.type === "group"
   );
   const personalChats = currChats.filter(
-    (chat) => chat.type === "private" && chat.participants.length === 2
+    (chat) => chat.type === "private"
   );
 
-  let renderedGroupChats,
-    renderedPersonalChats: Chat[];
+  let renderedGroupChats: Chat[], renderedPersonalChats: Chat[];
   if (searchQuery.length <= 2) {
     // render the normal chats dont search anythong until the quesry is above 2
-    renderedGroupChats = groupChats;
-    renderedPersonalChats = personalChats.map((personalChat) => {
-      const otherParticipant = personalChat.participants.find(
-        (participant) => participant._id !== user?._id
-      )!;
-
-      return {
-        _id: otherParticipant._id,
-        username: otherParticipant.username,
-        avatar: otherParticipant.avatar || "", // Provide default empty string if avatar is undefined
-        lastMessage: personalChat.lastMessage?.content ?? "no chat yet",
-        walletAddress: otherParticipant.walletAddress,
-        type: "private",
-        updatedAt: personalChat.updatedAt.toISOString(),
-        status: otherParticipant.status,
-        unreadCount: personalChat.unreadCount,
-        pinned: user?.pinnedChats?.some(
-          (chatId) => chatId === personalChat._id
-        ) ?? false,
-
-        
-      };
-    });
-    return [renderedGroupChats, renderedPersonalChats];
+   
+    return currChats;
   } else {
     // we ncan now use the search esluts and not the original chat lists
-    renderedPersonalChats = searchResults.map((user) => {
+    renderedPersonalChats = searchResults.map((personalChat) => {
       // if  we already have the user in our chats, we don't want to return themso we can access the last message
       const existingChat = personalChats.find((chat) =>
-        chat.participants.some((participant) => participant._id === user._id)
+        chat._id === personalChat._id
       );
-
-      if (existingChat) {
-        return {
-          _id: user._id,
-          username: user.username,
-          avatar: user.avatar,
-          lastMessage: existingChat.lastMessage?.content ?? "no chat yet",
-          walletAddress: user.walletAddress,
-          type: "private",
-          updatedAt: existingChat.updatedAt.toISOString(),
-          status: user.status,
-          unreadCount: existingChat.unreadCount,
-          pinned: user.pinnedChats.includes(existingChat._id),
-          
-        };
+      if(existingChat) {
+        return{
+          ...existingChat,
+          lastMessage: existingChat.lastMessage ?? "no chat yet",
+          pinned: user?.pinnedChats?.some((chatId) => chatId === existingChat._id) ?? false,
+        }
       }
       // if we don't have the user in our chats,we can return the user as a new chat
-      return {
-        _id: user._id,
-        username: user.username,
-        avatar: user.avatar,
-        lastMessage: user.lastMessage || "no chat yet",
-        walletAddress: user.walletAddress,
-        type: "private",
-        updatedAt: new Date().toISOString(),
-        status: user.status,
-        unreadCount: 0,
-        pinned: user.pinnedChats?.some((chatId) => chatId === user._id),
-      };
+      return personalChat;
     });
-    return [groupChats, renderedPersonalChats];
+    renderedGroupChats = groupChats.filter((groupChat) => {
+      return groupChat.username.includes(searchQuery);
+    });
+
+    return [...renderedGroupChats, ...renderedPersonalChats];
+  }
+}
+
+// Image processing function to resize and compress images
+export function processImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new window.Image();
+      img.onload = () => {
+        // Create canvas for resizing
+        const canvas = document.createElement("canvas");
+        // Set max dimensions to 600x600
+        const MAX_WIDTH = 600;
+        const MAX_HEIGHT = 600;
+
+        let width = img.width;
+        let height = img.height;
+
+        // Resize image if it exceeds max dimensions
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to blob with quality adjustment
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to create blob"));
+              return;
+            }
+            // Create a new file from the blob
+            const resizedFile = new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(resizedFile);
+          },
+          "image/jpeg",
+          0.85
+        ); // Adjust quality (0.85 gives good balance)
+      };
+      img.onerror = () => {
+        reject(new Error("Failed to load image"));
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = () => {
+      reject(new Error("Failed to read file"));
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function handleOutsideClick(
+  e: React.MouseEvent,
+  contentRef: RefObject<HTMLDivElement | null>,
+  callback: () => any
+) {
+  if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
+    callback();
   }
 }

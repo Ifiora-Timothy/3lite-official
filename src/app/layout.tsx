@@ -31,7 +31,7 @@ const poppins = Poppins({
 });
 
 export const metadata:Metadata = {
-  title: "3Lite",
+  title: "3LiteMessenger - Secure and Private Messaging",
   description: "3Lite is a social media app built on the solana Network",
   
 };

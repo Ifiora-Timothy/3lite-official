@@ -9,123 +9,71 @@ import {
   startTransition,
   useRef,
 } from "react";
-import { TactiveUser } from "../../../types";
 
 import { addMessage, getChat } from "@/actions/dbFunctions";
 import { FirebaseChat } from "@/class/firebase_chat";
 import useAuth from "../hooks/useAuth";
-import { getChats, getUsersFromRegex } from "@/actions/dbFunctions";
+import { getChats } from "@/actions/dbFunctions";
 import mongoose from "mongoose";
-import { IMessage } from "../../../types";
-import { IPopulatedChat } from "@/lib/db/models/chat";
+import { IMessage } from "../../types";
 import { useChat } from "../contexts/ChatContext";
-export const ChatContext = createContext<{
-  type: "group" | "private";
+
+import { Chat } from "@/types";
+
+type IChatContext = {
+  type: "group" | "private" | "ai";
   isLoading: boolean;
   optimisticMessages: IMessage[];
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
-  handleSend: () => Promise<void>;
+  handleSend: (type: "private" | "group" | "ai") => Promise<void>;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
   scrollToBottom: () => void;
-  getAllChats:()=>Promise<null|IPopulatedChat[]>;
-}>(
-  {} as {
-    type: "group" | "private";
-    isLoading: boolean;
-    optimisticMessages: IMessage[];
-    messagesEndRef: React.RefObject<HTMLDivElement | null>;
-    handleSend: () => Promise<void>;
-    inputRef: React.RefObject<HTMLTextAreaElement | null>;
-    scrollToBottom: () => void;
-    getAllChats:()=>Promise<null|IPopulatedChat[]>
-  }
-);
+  getAllChats: () => Promise<null | Chat[]>;
+  currChats: Chat[];
+};
+export const ChatContext = createContext<IChatContext>({} as IChatContext);
 
 export const ChatProvider = ({ children }: PropsWithChildren) => {
-  const {activeChat,setActiveChat}= useChat();
-  // const [activeUser, setActiveUser] = useState<TactiveUser | null>(null);
-
-  // State to track the current chat ID
   const [chatId, setChatId] = useState<string | null>(null);
-  // Add this near your other state declarations
   const messagesCache = useRef<Record<string, IMessage[]>>({});
-  // State to store messages from the database
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [type, setType] = useState<"group" | "private">("private");
-
-  // State to track loading status
   const [isLoading, setIsLoading] = useState(true);
-  // Add a new state to track when we're switching between users
   const [isSwitchingUser, setIsSwitchingUser] = useState(false);
-
-  // Reference to the end of the messages list for auto-scrolling
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
-  // Reference to the input field for message entry
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
-
-  // Track the previous active user ID to detect changes
-  const prevActiveUserIdRef = useRef<string | null>(null);
-
-  /**
-   * Optimistic UI update for instant feedback when sending messages
-   * Adds new messages to the UI before server confirmation
-   */
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [currChats, setCurrChats] = useState<Chat[]>([]);
   const [optimisticMessages, addOptimisticMessage] = useOptimistic<
     IMessage[],
     IMessage
   >(messages, (state, newMessage) => {
-    // Remove any temporary message with the same ID
-    const filteredState = state.filter((msg) => msg._id !== newMessage.tempId);
-    // Add the new message to the list
-    return [...filteredState, newMessage];
+    const filteredState = state.filter((msg) => msg._id !== newMessage.tempId); // Remove any temporary message with the same ID
+    return [...filteredState, newMessage]; // Add the new message to the list
   });
-  // Keep the isSwitchingUser state but also add a loadingMessages flag
-  const [loadingMessages, setLoadingMessages] = useState(true);
 
-  // Access the current authenticated user
-  const { activeUser: user } = useAuth();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const prevActiveUserIdRef = useRef<string | null>(null);
 
-  /**
-   * Scrolls the chat to the bottom to show the latest messages
-   */
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const { activeChat, setActiveChat } = useChat();
+  const { activeUser } = useAuth(); // Access the current authenticated activeUser
+
+  // Create a memoized key for the chat to help with caching
+  const chatKey = useMemo(() => {
+    if (activeChat?._id && activeUser?._id) {
+      return `chat-${activeUser._id}-${activeChat._id}`;
+    }
+    return null;
+  }, [activeChat?._id, activeUser?._id]);
 
   // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
   }, [optimisticMessages]);
-
-  
-
-  // Create a memoized key for the chat to help with caching
-  const chatKey = useMemo(() => {
-    if (activeChat?._id && user?._id) {
-      return `chat-${user._id}-${activeChat._id}`;
-    }
-    return null;
-  }, [activeChat?._id, user?._id]);
-
   /**
    * Clear messages when switching users to prevent flashing of previous messages
    */
-  useEffect(() => {
-    // If activeUser has changed, set switching state and clear messages
-    if (activeChat?._id !== prevActiveUserIdRef.current && activeChat?._id) {
-      setLoadingMessages(true); // Set this true immediately when switching users
-      setIsSwitchingUser(true);
-      setMessages([]);
-      prevActiveUserIdRef.current = activeChat._id;
-    }
-  }, [activeChat?._id]);
 
-  /**
-   * Initialize chat when users are selected
-   * Fetches chat history between two users
-   */
-  // Modify the user switching effect to also trigger loadingMessages
+  // Modify the activeUser switching effect to also trigger loadingMessages
   useEffect(() => {
     // If activeUser has changed, set switching state and clear messages
     if (activeChat?._id !== prevActiveUserIdRef.current && activeChat?._id) {
@@ -141,8 +89,8 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     let isMounted = true;
 
     const initializeChat = async () => {
-      // Return early if either user is not defined
-      if (!activeChat?._id || !user?._id) {
+      // Return early if either activeUser is not defined
+      if (!activeChat?._id || !activeUser?._id) {
         if (isMounted) {
           setIsLoading(false);
           setIsSwitchingUser(false);
@@ -157,9 +105,12 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
           setIsLoading(true);
           // No need to modify loadingMessages here as it should already be true
         }
-
         // Get chat data from database using server action
-        const chatData = await getChat(user._id, activeChat._id);
+        const chatData = await getChat(
+          activeChat.type,
+          activeUser._id,
+          activeChat._id
+        );
         const parsedChat = JSON.parse(chatData);
 
         // If no chat exists between these users
@@ -167,9 +118,6 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
           if (isMounted) {
             setChatId(null);
             setMessages([]);
-            // Only set loadingMessages to false here if there will be no chatId
-            // since there won't be any Firebase subscription
-            // setLoadingMessages(false);
           }
           return;
         }
@@ -179,15 +127,9 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
           setChatId(parsedChat._id);
           setType(parsedChat.type);
 
-          // // Check if we already have cached messages for this chat
-          // if (messagesCache.current[parsedChat._id]) {
-          //   // Use cached messages
-          //   setMessages(messagesCache.current[parsedChat._id]);
-          //   // Still set loading to false since we have messages
-          //   setLoadingMessages(false);
-          // }
           setMessages(parsedChat.messages);
           FirebaseChat.syncHistoricalData(parsedChat.messages, parsedChat._id);
+
           setLoadingMessages(false);
         }
       } catch (error) {
@@ -228,10 +170,6 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
       }
 
       try {
-        // Only set loading if we don't have cached messages
-        // if (!messagesCache.current[chatId]) {
-        //   setLoadingMessages(true);
-        // }
         // Subscribe to messages for this chat
         unsubscribe = FirebaseChat.subscribeToChat(chatId, (newMessages) => {
           // Convert Firebase messages to our Message interface
@@ -239,11 +177,15 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
             (message: any) => ({
               _id: message._id,
               content: message.content,
+              chat: message.chat,
               sender: message.sender,
               contentType: message.contentType,
+              receiverType: message.receiverType,
               receiver: message.receiver,
               createdAt: new Date(message.createdAt),
               deliveryStatus: message.deliveryStatus,
+              deliveredTo: message.deliveredTo,
+              readBy: message.readBy,
             })
           );
 
@@ -271,14 +213,78 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     };
   }, [chatId]);
 
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+    if (!activeUser?._id) return;
+
+    const setupFirebaseUserSubscription = async () => {
+      try {
+  
+        // Subscribe to messages for this chat
+        unsubscribe = FirebaseChat.subscribeToUserChats(
+          activeUser._id,
+          async (_chats) => {
+            
+            //  const chats = await getAllChats();
+            //  
+            
+            const chats = await getChats(activeUser?._id);
+       
+            const parsedChats: Chat[] = JSON.parse(chats).filter(
+              (chat: any) => {
+                // make date in updated type to be a date type
+                chat.updatedAt = new Date(chat.updatedAt);
+                return chat;
+              }
+            );
+            
+            setCurrChats(parsedChats);
+          }
+        );
+      } catch (error) {
+        setLoadingMessages(false);
+        console.error("Firebase subscription error:", error);
+      }
+    };
+    setupFirebaseUserSubscription();
+
+    // Cleanup function to unsubscribe from Firebase when component unmounts
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [activeUser?._id]);
+
+  // get all chats when user is connected
+  useEffect(() => {
+    async function fetchChats() {
+      if (!activeUser?._id) return null;
+      const chats = await getAllChats();
+      if (!chats) {
+        console.error("Failed to fetch chats");
+        return;
+      }
+      setCurrChats(chats);
+    }
+
+    fetchChats();
+  }, [activeUser?._id]);
+
+  /**
+   * Scrolls the chat to the bottom to show the latest messages
+   */
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   /**
    * Send a new message
    * Uses optimistic updates for immediate UI feedback
    */
-  const handleSend = async () => {
- 
-    if (!inputRef.current || !activeChat?.username || !user?._id) return;
-  const message = inputRef.current.value.trim();
+  const handleSend = async (type: "private" | "group" | "ai") => {
+    if (!inputRef.current || !activeChat?.username || !activeUser?._id) return;
+    const message = inputRef.current.value.trim();
     if (!message) return;
 
     // Generate temporary ID for optimistic update
@@ -290,12 +296,14 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
       _id: tempId,
       tempId,
       content: message,
+      chat: chatId || tempId,
       sender: {
-        _id: user._id,
-        username: user.username,
-        avatar: user.avatar,
-        walletAddress: user.walletAddress,
+        _id: activeUser._id,
+        username: activeUser.username,
+        avatar: activeUser.avatar,
+        walletAddress: activeUser.walletAddress,
       },
+      receiverType: activeChat.type == "group" ? "Chat" : "User",
       contentType: "text",
       receiver: {
         _id: activeChat._id,
@@ -305,6 +313,8 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
       },
       createdAt,
       deliveryStatus: "sending",
+      deliveredTo: [],
+      readBy: [],
     };
 
     // Clear input field
@@ -324,9 +334,10 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
             id: tempId,
             chatId,
             createdAt,
-            sender: user._id,
+            sender: activeUser._id,
             receiver: activeChat._id,
             message,
+            type,
           });
           // If this is a new chat, update the chatId
           if (!chatId) {
@@ -346,44 +357,25 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
-   const getAllChats = async ():Promise<null|IPopulatedChat[]> => {
- 
-      if (!user?._id) return null;
-      try {
-       
-        const chats = await getChats(user?._id);
-        const parsedChats: IPopulatedChat[] = JSON.parse(chats).filter((chat:any)=>{
-          // make date in updated type to be a date type
-          chat.updatedAt = new Date(chat.updatedAt);
-          return chat;
-        });
-  
-        if (parsedChats.length > 0) {
-          const otherParticipant = parsedChats[0].participants.filter(
-            (participant) => participant._id !== user._id
-          )[0];
-  
-          setActiveChat({
-            _id: otherParticipant._id,
-            username: otherParticipant.username,
-            avatar: otherParticipant.avatar || "",
-            walletAddress: otherParticipant.walletAddress ?? "0x0",
-            lastMessage: parsedChats[0].lastMessage?.content ?? "no chat yet",
-            updatedAt: parsedChats[0].updatedAt.toISOString(),
-            status: otherParticipant.status,
-            unreadCount: parsedChats[0].unreadCount,
-            pinned: user.pinnedChats?.includes(parsedChats[0]._id),
-            type: parsedChats[0].type,
-          });
-        }
+  const getAllChats = async (): Promise<null | Chat[]> => {
+    if (!activeUser?._id) return null;
+    try {
+      const chats = await getChats(activeUser?._id);
+      const parsedChats: Chat[] = JSON.parse(chats).filter((chat: any) => {
+        // make date in updated type to be a date type
+        chat.updatedAt = new Date(chat.updatedAt);
+        return chat;
+      });
+      
+      setActiveChat(parsedChats[0]);
 
-        return parsedChats;
-      } catch (error) {
-        console.error("Error fetching chats:", error);
-        throw Error("Failed to load chats");
-      } 
-    };
-  
+      return parsedChats;
+    } catch (error) {
+      console.error("Error fetching chats:", error);
+      throw Error("Failed to load chats");
+    }
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -394,7 +386,8 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
         handleSend,
         inputRef,
         scrollToBottom,
-        getAllChats
+        getAllChats,
+        currChats,
       }}
     >
       {children}

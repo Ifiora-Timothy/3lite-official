@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import Image from "next/image";
 import React from "react";
-import { TactiveUser } from "../../../../types";
+import { TactiveUser } from "../../../types";
 
 type Props = {
   lastMessage?: string | { sender: string; message: string };

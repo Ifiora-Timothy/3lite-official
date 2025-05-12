@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useChat } from "@/app/contexts/ChatContext";
 import ChatListItem from "@/app/components/Chat/ChatListItem";
 import Input from "../UI/Input";
@@ -8,60 +8,28 @@ import Button from "../UI/Button";
 import { MessageSquare } from "lucide-react";
 import { useChatContext } from "../hooks/useChatContext";
 import useAuth from "../hooks/useAuth";
-import { UserDetails } from "../../../types";
-import { IPopulatedChat } from "@/lib/db/models/chat";
 
 import { getPersonalandGroupChats } from "@/lib/utils/helpers";
 import { useDebouncedCallback } from "use-debounce";
 import { getUsersFromRegex } from "@/actions/dbFunctions";
+import { Chat } from "@/types";
 
-interface ChatListProps {
-  onChatSelect: () => void;
-}
-
-const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
-  const { getAllChats: getFullChat } = useChatContext();
+const ChatList = () => {
   const { activeUser: user } = useAuth();
-  const { chats, filterChats, searchChats } = useChat();
+  const { chats, filterChats } = useChat();
 
   // Move all useState declarations to the top
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<UserDetails[]>([]);
-  const [currChats, setCurrChats] = useState<IPopulatedChat[]>([]);
-  const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<Chat[]>([]);
+
+  
   const [activeFilter, setActiveFilter] = useState<
     "all" | "pinned" | "ai" | "group"
   >("all");
 
+  const { currChats } = useChatContext();
 
-  const getAllChats = async () => {
-    setIsFetching(true);
-    setError(null);
-
-    try {
-      const chats = await getFullChat();
-      if (!chats) {
-        setError("Failed to fetch chats");
-
-        return;
-      }
-
-      setCurrChats(chats);
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user?._id) {
-      getAllChats();
-    } 
-  }, [user?._id]);
-
-  let [_renderedGroupChats, renderedPersonalChats] = getPersonalandGroupChats(
+  let renderedChats = getPersonalandGroupChats(
     currChats,
     searchQuery,
     searchResults,
@@ -74,30 +42,27 @@ const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
   };
 
   const debounced = useDebouncedCallback(async (userRegex: string) => {
-    setIsFetching(true);
-    setError(null);
 
     try {
-      const users = await getUsersFromRegex(userRegex);
+      const chats = await getUsersFromRegex(userRegex);
+      const parsedResults: Chat[] = JSON.parse(chats).filter((chat: any) => {
+        // make date in updated type to be a date type
+        chat.updatedAt = new Date(chat.updatedAt);
+        return chat;
+      });
 
       if (!user?._id) {
-        setIsFetching(false);
         setSearchResults([]);
         return;
       }
 
-      const parsedUsers = JSON.parse(users).filter(
-        (thisUser: { _id: { toString: () => string } }) =>
-          thisUser._id.toString() !== user._id
-      );
+    
 
-      setSearchResults(parsedUsers);
+      setSearchResults(parsedResults);
     } catch (error) {
       console.error("Error searching users:", error);
-      setError("Failed to search users");
-    } finally {
-      setIsFetching(false);
-    }
+     setSearchResults([]);
+    } 
   }, 300);
 
   const handleType = (userRegex: string) => {
@@ -107,8 +72,8 @@ const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
       return;
     }
     debounced(userRegex);
-  };
 
+  };
 
   return (
     <div className="w-full h-full   flex flex-col ">
@@ -151,7 +116,7 @@ const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
         </div>
       </div>
 
-      <div className="flex-1 w-full overflow-y-auto p-2">
+      <div className="flex-1 w-full h-full overflow-y-auto p-2">
         {chats.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <div className="mb-4 p-4 rounded-full bg-primary-color/10">
@@ -165,8 +130,9 @@ const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {renderedPersonalChats.map((chat) => (
+          <div className="space-y-2 overflow-x-auto h-full">
+            {renderedChats.map((chat) => (
+
               <ChatListItem key={chat._id} chat={chat} />
             ))}
           </div>

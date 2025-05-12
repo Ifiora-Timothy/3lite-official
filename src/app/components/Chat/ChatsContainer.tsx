@@ -36,7 +36,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Prevent newline
-      handleSend();
+      handleSend(activeChat?.type??"private");
       setMessageInput(''); // Clear input after sending
     }
   };
@@ -137,7 +137,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
       <form onSubmit={async (e) => {
           e.preventDefault();
           if (disabled) return;
-          await handleSend();
+          await handleSend(activeChat?.type ?? "private");
           // clear the input field
           setMessageInput("");
         }}

@@ -3,7 +3,6 @@ import { Pin, Users } from 'lucide-react';
 import Avatar from '@/app/UI/Avatar';
 import { useChat } from '../../contexts/ChatContext';
 import { Chat } from '@/types';
-import { useChatContext } from '@/app/hooks/useChatContext';
 
 interface ChatListItemProps {
   // chat: Chat;
@@ -29,7 +28,6 @@ const ChatListItem: React.FC<ChatListItemProps> = ({ chat}) => {
 
   const handleClick = () => {
     setActiveChat(chat);
-  
     if (isMobile) {
       setShowChatList(false);
     }

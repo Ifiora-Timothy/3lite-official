@@ -1,10 +1,9 @@
 "use client";
 
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
-import { UserDetails } from "../../../types";
+import { UserDetails } from "../../types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { getUserByWalletAddress } from "@/actions/dbFunctions";
-import { usePathname, useRouter } from "next/navigation";
 
 type IAuthContext = {
   activeUser: UserDetails | null;
@@ -23,8 +22,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const { publicKey, connected } = useWallet();
   
   const [authInitialized, setAuthInitialized] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
 
   const setUser = (user: UserDetails) => {
     // Update the in memory state and local storage

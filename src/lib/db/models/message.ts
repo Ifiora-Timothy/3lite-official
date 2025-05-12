@@ -12,11 +12,21 @@ export interface ImessageContent {
   _id: string; // Unique identifier for the message
   chat: mongoose.Types.ObjectId; // Reference to the chat this message belongs to
   sender: mongoose.Types.ObjectId; // User who sent the message
+  receiverType: "User" | "Chat"; // Indicates if receiver is a user or a group
+
   receiver: mongoose.Types.ObjectId; // User who receives the message
   content: string; // Actual content of the message
   messageContentType: "text" | "image" | "file"; // Type of content in the message
-  deliveryStatus: "sending"|"sent" | "delivered" | "read"; // Current delivery status
+  deliveryStatus: "sending" | "sent" | "delivered" | "read"; // Current delivery status
   deliveredAt?: Date; // When the message was delivered
+  deliveredTo: Array<{
+    _id: mongoose.Types.ObjectId;
+    date: Date;
+  }>; //Array of user IDs who have received the message
+  readBy: Array<{
+    _id: mongoose.Types.ObjectId;
+    date: Date;
+  }>; //Array of user IDs who have read the message
   readAt?: Date; // When the message was read
   transactionHash?: string; // Optional blockchain transaction hash
   blockchainStatus?: "pending" | "confirmed"; // Status of blockchain transaction if applicable
@@ -32,16 +42,28 @@ export interface IpopulatedMessageContent {
     avatar?: string;
     status?: string;
   };
+  receiverType: "User" | "Chat"; // Indicates if receiver is a user or a group
+
   receiver: {
     _id: string;
-    username: string;
-    walletAddress: string;
+    username?: string; // For users
+    walletAddress?: string; // For users
+    groupName?: string; // For groups
+    groupAvatar?: string; // For groups
     avatar?: string;
     status?: string;
   };
+  deliveredTo: Array<{
+    _id: mongoose.Types.ObjectId;
+    date: Date;
+  }>; //Array of user IDs who have received the message
+  readBy: Array<{
+    _id: mongoose.Types.ObjectId;
+    date: Date;
+  }>; //Array of user IDs who have read the message
   content: string; // Actual content of the message
   contentType: "text" | "image" | "file"; // Type of content in the message
-  deliveryStatus: "sending"|"sent" | "delivered" | "read"; // Current delivery status
+  deliveryStatus: "sending" | "sent" | "delivered" | "read"; // Current delivery status
   deliveredAt?: Date; // When the message was delivered
   readAt?: Date; // When the message was read
   createdAt: Date; // When the message was created
@@ -72,11 +94,19 @@ const messageSchema = new mongoose.Schema<IMessage, MessageModel>(
       required: true,
     },
 
+    // Type of receiver (user or group)
+    receiverType: {
+      type: String,
+      enum: ["User", "Chat"],
+      required: true,
+    },
+
     // User who receives the message
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+
       required: true,
+      refPath: "receiverType",
     },
 
     // Actual content of the message
@@ -96,6 +126,24 @@ const messageSchema = new mongoose.Schema<IMessage, MessageModel>(
       enum: ["sent", "delivered", "read"],
       default: "sent",
     },
+    deliveredTo: [
+      {
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        date: Date,
+      },
+    ],
+    readBy: [
+      {
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        date: Date,
+      },
+    ],
 
     // When the message was delivered
     deliveredAt: Date,
@@ -146,6 +194,7 @@ export interface MessageModel extends Model<IMessage> {
     createdAt: Date;
     content: string;
     contentType: "text" | "image" | "file";
+    type: "private" | "group" | "ai";
   }): Promise<{
     message: IMessage;
     chat: IChat;
@@ -192,7 +241,12 @@ messageSchema.statics.getMessages = async function ({
     .sort({ createdAt: -1 }) // Newest first
     .limit(Number(limit)) // Limit for pagination
     .populate("sender", "username avatar status walletAddress") // Include sender details
-    .populate("receiver", "username avatar status walletAddress") // Include receiver details
+    .populate({
+      // Dynamically populate receiver based on receiverType
+      path: "receiver",
+      // Use refPath defined in the schema to dynamically determine which model to use
+      select: "username walletAddress avatar status groupDetails",
+    })
     .lean(); // Return plain objects
 
   if (!messages) {
@@ -220,6 +274,7 @@ messageSchema.statics.addMessage = async function ({
   content,
   createdAt,
   contentType,
+  type,
 }: {
   chatId?: string | null;
   sender: string;
@@ -228,6 +283,7 @@ messageSchema.statics.addMessage = async function ({
   createdAt: Date;
   content: string;
   contentType: "text" | "image" | "file";
+  type: "private" | "group" | "ai";
 }) {
   // Start a transaction for atomicity
   const session = await mongoose.startSession();
@@ -240,35 +296,50 @@ messageSchema.statics.addMessage = async function ({
 
   try {
     let isNewChat = false;
+    let chat: IChat = {} as IChat;
 
-    // Find existing chat or create new one
-    let chat = await Chat.findOne({
-      type: "private",
-      participants: { $all: participantIds },
-    });
-
-    if (!chat) {
-      // Create new chat if none exists
-      chat = await Chat.create({
-        type: "private",
-        participants: participantIds,
+    if (type == "group") {
+      // If the type is group, we need to find the group chat
+      const chatExist = await Chat.findOne({
+        type: "group",
+        _id: new mongoose.Types.ObjectId(receiver),
       });
-      isNewChat = true;
-    }
 
-    if (isNewChat) {
-      // Update both users' chat lists if this is a new chat
-      await User.updateMany(
-        { _id: { $in: participantIds } },
-        {
-          $push: { chats: chat._id },
-          $set: { updatedAt: new Date() },
-        },
-        {
-          session,
-          multi: true,
-        }
-      );
+      if (!chatExist) {
+        throw new Error("Group chat not found");
+      }
+      chat = chatExist;
+    } else {
+      // Find existing chat or create new one
+
+      const chatExist = await Chat.findOne({
+        type: "private",
+        participants: { $all: participantIds },
+      });
+      if (!chatExist) {
+        // Create new chat if none exists
+        chat = await Chat.create({
+          type: "private",
+          participants: participantIds,
+        });
+        isNewChat = true;
+      }
+
+      if (isNewChat) {
+        // Update both users' chat lists if this is a new chat
+        await User.updateMany(
+          { _id: { $in: participantIds } },
+          {
+            $push: { chats: chat._id },
+            $set: { updatedAt: new Date() },
+          },
+          {
+            session,
+            multi: true,
+          }
+        );
+      }
+      chat = chatExist || chat;
     }
 
     // Create the message with specified ID
@@ -279,7 +350,9 @@ messageSchema.statics.addMessage = async function ({
           sender,
           _id: new mongoose.Types.ObjectId(id),
           receiver,
+          receiverType: type == "private" ? "User" : "Chat",
           content,
+
           contentType,
           deliveryStatus: "sent",
           createdAt,
@@ -288,12 +361,25 @@ messageSchema.statics.addMessage = async function ({
       { session }
     );
     // Access the first element of the array before calling populate
-    const populatedMessage: IpopulatedMessageContent = await (
-      await message[0].populate(
-        "sender",
-        "username avatar status walletAddress"
-      )
-    ).populate("receiver", "username avatar status walletAddress");
+    // 
+    let populatedMessage = await message[0].populate(
+      "sender",
+      "username avatar status walletAddress"
+    );
+
+    if (message[0].receiverType === "Chat") {
+      // For group chats, specifically include the groupDetails object
+      populatedMessage = await populatedMessage.populate(
+        "receiver",
+        "groupDetails  type walletAddress"
+      );
+    } else {
+      // For user chats
+      populatedMessage = await populatedMessage.populate({
+        path: "receiver",
+        select: "username walletAddress avatar status",
+      });
+    }
 
     // Update chat with reference to this new message
     const chatDoc = await Chat.findByIdAndUpdate(
@@ -305,6 +391,9 @@ messageSchema.statics.addMessage = async function ({
       },
       { new: true, session }
     );
+    if (!chatDoc) {
+      throw new Error("Chat not found");
+    }
 
     // Update sender and receiver message lists in parallel
     await Promise.all([
@@ -328,21 +417,41 @@ messageSchema.statics.addMessage = async function ({
 
     // Sync with Firebase for real-time updates
     if (chat) {
-      await FirebaseChat.syncChat(chat);
+      
+      await FirebaseChat.syncChat(chatDoc);
+      
       await FirebaseChat.syncMessage({
         _id: populatedMessage._id.toString(),
         chat: populatedMessage.chat.toString(),
-        sender: populatedMessage.sender,
-        receiver: populatedMessage.receiver,
+        sender: populatedMessage.sender as any,
+        receiver: populatedMessage.receiver as any,
         content: populatedMessage.content,
-        contentType: populatedMessage.contentType,
+        contentType: populatedMessage.contentType as any,
         createdAt: populatedMessage.createdAt!,
         deliveryStatus: populatedMessage.deliveryStatus,
+        deliveredTo: populatedMessage.deliveredTo.map((a) => ({
+          date: a.date,
+          _id: a._id.toString(),
+        })),
+        readBy: populatedMessage.readBy.map((a) => ({
+          date: a.date,
+          _id: a._id.toString(),
+        })),
+        receiverType: populatedMessage.receiverType,
       });
- 
+    } else {
+      
     }
 
     await session.commitTransaction();
+    // Then add each participant to the chat mapping
+    
+    chat.participants.forEach((userId) =>{
+
+      
+      FirebaseChat.addUserToChat(userId.toString(), chat._id.toString(), new Date());
+    });
+
     return {
       message: message[0],
       chat: chatDoc,
@@ -393,6 +502,7 @@ messageSchema.statics.updateDeliveryStatus = async function (
   if (!updatedMessage) throw new Error("Message not found");
 
   // Convert to the expected IpopulatedMessageContent type
+  // Convert to the expected IpopulatedMessageContent type
   const mess: IpopulatedMessageContent = {
     ...updatedMessage,
     _id: updatedMessage._id.toString(),
@@ -418,15 +528,23 @@ messageSchema.statics.updateDeliveryStatus = async function (
   // Sync updated status to Firebase for real-time updates
   await FirebaseChat.syncMessage({
     _id: mess._id.toString(),
-    chat: mess.chat.toString(),
     sender: mess.sender,
     receiver: mess.receiver,
+    chat: mess.chat.toString(),
     content: mess.content,
     contentType: mess.contentType,
     createdAt: mess.createdAt!,
     deliveryStatus: mess.deliveryStatus,
+    receiverType: updatedMessage.receiverType,
+    deliveredTo: updatedMessage.deliveredTo.map((a) => ({
+      date: a.date,
+      _id: a._id.toString(),
+    })),
+    readBy: updatedMessage.readBy.map((a) => ({
+      date: a.date,
+      _id: a._id.toString(),
+    })),
   });
-
   return mess;
 };
 

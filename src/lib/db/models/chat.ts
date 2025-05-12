@@ -2,32 +2,8 @@
 import mongoose, { Model } from "mongoose";
 import { IMessage, Message, MessageModel } from "./message";
 import { Iuser, User, UserModel } from "./user";
-
-/**
- * Interface defining the structure for group chat details
- */
-interface group {
-  groupName: string; // Name of the group
-  groupAvatar: string; // URL to the group's avatar image
-  groupDescription: string; // Text description of the group
-}
-
-/**
- * Interface defining the base structure of a chat document
- */
-export interface IchatContent {
-  _id: string; // Unique identifier for the chat
-  type: "private" | "group"|"ai"; // Type of chat - either between two users or a group
-  participants: Array<mongoose.Types.ObjectId>; // Array of user IDs participating in the chat
-  messages: Array<mongoose.Types.ObjectId>; // Array of message IDs in this chat
-  unreadCount: number; // Optional count of unread messages for this chat
-  lastMessage?: mongoose.Types.ObjectId; // Reference to the most recent message (for preview/sorting)
-  createdAt: Date; // When the chat was created
-  updatedAt: Date; // When the chat was last updated
-  groupDetails?: group; // Group-specific details (only for group chats)
-  contractAddress?: string; // Optional blockchain contract address (for on-chain functionality)
-
-}
+import { group, IchatContent, Igroup } from "../../../types";
+import { FirebaseChat } from "@/class/firebase_chat";
 
 /**
  * Interface for a populated chat with expanded references
@@ -38,7 +14,7 @@ export interface IPopulatedChat
   lastMessage?: IMessage; // Full message object instead of just the ID
   participants: Array<Iuser>; // Full user objects instead of just IDs
   messages: Array<IMessage>; // Full message objects instead of just IDs
-  groupDetails?: group; // Group details if applicable
+  groupDetails?: Igroup; // Group details if applicable
 }
 
 /**
@@ -52,14 +28,21 @@ export interface IChat extends Document, IchatContent {}
 export interface ChatModel extends Model<IChat> {
   // Get a chat between two specific users
   getChat(data: { userId: string; user2Id: string }): Promise<IChat>;
+  getGroupChat(data: { chatId: string }): Promise<IChat>;
 
   // Get all chats for a specific user
-  getChats(data: { userId: string }): Promise<Array<IChat>>;
+  getChats(data: { userId: string }): Promise<Array<IPopulatedChat>>;
 
   // Create a new chat between users
   createChat(data: {
-    type: "private" | "group"|"ai"|"ai";
+    type: "private" | "group" | "ai";
     participants: Array<string>;
+  }): Promise<IChat>;
+  // Create a new group chat
+  createGroupChat(data: {
+    groupDetails: group;
+    participants: Array<string>;
+    type: "private" | "group" | "ai";
   }): Promise<IChat>;
 }
 
@@ -71,7 +54,7 @@ const chatSchema = new mongoose.Schema(
     // Type of chat - private (2 users) or group (multiple users)
     type: {
       type: String,
-      enum: ["private", "group"],
+      enum: ["private", "group", "ai"], // Allowed values for chat type
       required: true,
     },
 
@@ -169,7 +152,7 @@ chatSchema.statics.getChats = async function ({ userId }: { userId: string }) {
       participants: userId,
     })
       .sort({ updatedAt: -1 }) // Sort by most recent first
-      .populate("participants") // Include full user objects
+      .populate("participants", "username avatar walletAddress status") // Include full user objects
       .populate("lastMessage", "content createdAt deliveryStatus") // Include last message details
       .lean(); // Return plain objects instead of Mongoose documents
 
@@ -188,7 +171,7 @@ chatSchema.statics.createChat = async function ({
   type,
   participants,
 }: {
-  type: "private" | "group"|"ai";
+  type: "private" | "group" | "ai";
   participants: Array<string>;
 }) {
   // Start a transaction for atomicity
@@ -259,6 +242,79 @@ chatSchema.statics.createChat = async function ({
 };
 
 /**
+ * Static ethod to create a new group chat
+ */
+chatSchema.statics.createGroupChat = async function ({
+  groupDetails,
+  participants,
+  type,
+}: {
+  groupDetails: group;
+  participants: Array<string>;
+  type: "private" | "group" | "ai";
+}) {
+  // Start a transaction for atomicity
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    if (type !== "group") {
+      throw new Error("Invalid chat type for group chat");
+    }
+    // Convert string IDs to MongoDB ObjectIDs
+    const participantIds = participants.map(
+      (p) => new mongoose.Types.ObjectId(p)
+    );
+
+    // validate that the participants are three or more and that there is one admin
+    if (participantIds.length < 3) {
+      throw new Error("Group chat must have at least 3 participants");
+    }
+    if (groupDetails.admins.length < 1) {
+      throw new Error("Group chat must have at least one admin");
+    }
+
+    // Create the new group chat
+    const chat = await this.create(
+      [
+        {
+          type,
+          participants: participantIds,
+          groupDetails,
+        },
+      ],
+      { session }
+    );
+
+    // Update all participants' chat arrays to include this new chat
+    await User.updateMany(
+      { _id: { $in: participantIds } },
+      { $addToSet: { chats: chat[0]._id } }, // Add to set prevents duplicates
+      { session }
+    );
+
+    await session.commitTransaction();
+
+    chat[0].participants.forEach((userId: mongoose.Types.ObjectId) => {
+      FirebaseChat.addUserToChat(
+        userId.toString(),
+        chat[0]._id.toString(),
+        new Date()
+      );
+    });
+    return chat[0];
+  } catch (error) {
+    // Rollback changes if anything fails
+    await session.abortTransaction();
+    console.error("Error in createGroupChat:", error);
+    throw error;
+  } finally {
+    // Always end the session
+    session.endSession();
+  }
+};
+
+/**
  * Static method to get a specific chat between two users
  * Returns populated chat with participant details and messages
  */
@@ -288,6 +344,42 @@ chatSchema.statics.getChat = async function ({
         populate: [
           { path: "sender", select: "username avatar walletAddress status" },
           { path: "receiver", select: "username avatar walletAddress status" },
+        ],
+      })
+      .lean(); // Return plain objects instead of Mongoose documents
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+/**
+ * Static method to get a specific group chat
+ * Returns populated chat with participant details and messages
+ */
+chatSchema.statics.getGroupChat = async function ({
+  chatId,
+}: {
+  chatId: string;
+}) {
+  // Convert string IDs to MongoDB ObjectIDs
+  const parsedGroupId = new mongoose.Types.ObjectId(chatId);
+  try {
+    // Find the private chat that includes both users
+    return await this.findOne({
+      type: "group",
+      _id: parsedGroupId,
+    })
+      .sort({ updatedAt: -1 })
+      .populate("participants", "username avatar status") // Include key user details
+      .populate({
+        path: "messages",
+        options: {
+          sort: { createdAt: 1 }, // Sort messages by createdAt ascending
+        },
+        populate: [
+          { path: "sender", select: "username avatar walletAddress status" },
+          { path: "receiver", select: "_id" },
         ],
       })
       .lean(); // Return plain objects instead of Mongoose documents

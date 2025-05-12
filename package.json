@@ -33,7 +33,7 @@
     "lucide-react": "^0.487.0",
     "mongodb-memory-server": "^10.1.4",
     "mongoose": "^8.13.2",
-    "next": "^15.3.0",
+    "next": "^15.3.2",
     "next-cloudinary": "^6.16.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

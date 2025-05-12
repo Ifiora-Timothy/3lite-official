@@ -1,3 +1,4 @@
+"use client"
 import Image from 'next/image';
 import React from 'react';
 
@@ -16,6 +17,7 @@ const Avatar: React.FC<AvatarProps> = ({
   status = null,
   walletAddress,
 }) => {
+  
   const getInitials = (name: string): string => {
     if (walletAddress) {
       // Show first 2 + last 2 characters of wallet address

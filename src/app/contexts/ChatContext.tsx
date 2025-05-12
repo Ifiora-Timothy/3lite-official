@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { ChatMessage, Chat, NFT } from '@/types';
+import { ChatMessage, Chat} from '@/types';
 import { chatData, messageData } from '@/data/mockData';
 
 interface ChatContextType {
@@ -49,6 +49,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
  const [showProfile, setShowProfile] = useState(false);
   const [showChatList, setShowChatList] = useState(true);
   
+  
   const [isMobile, setIsMobile] = useState(false);
 
 
@@ -69,6 +70,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
 
   const handleSetActiveChat = (chat: Chat) => {
+         
     setActiveChat(chat);
     // In a real app, we would fetch messages for this chat
     setMessages(messageData.filter(msg => msg.chatId === chat._id));
