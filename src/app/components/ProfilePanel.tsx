@@ -52,7 +52,7 @@ const ProfilePanel= () => {
           {/* Header */}
           <div className="text-center mb-6">
             <div className="mx-auto mb-3">
-              <Avatar name={user.name} size="xl" status="online" />
+              <Avatar src={activeChat?.avatar} name={user.name} size="xl" status="online" />
             </div>
             <h1 className="text-2xl font-bold mb-1">{user.name}</h1>
 
