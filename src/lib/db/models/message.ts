@@ -418,9 +418,9 @@ messageSchema.statics.addMessage = async function ({
     // Sync with Firebase for real-time updates
     if (chat) {
       
-      await FirebaseChat.syncChat(chatDoc);
+      const chatPromise= FirebaseChat.syncChat(chatDoc);
       
-      await FirebaseChat.syncMessage({
+       const messagePromise= FirebaseChat.syncMessage({
         _id: populatedMessage._id.toString(),
         chat: populatedMessage.chat.toString(),
         sender: populatedMessage.sender as any,
@@ -439,9 +439,10 @@ messageSchema.statics.addMessage = async function ({
         })),
         receiverType: populatedMessage.receiverType,
       });
-    } else {
-      
-    }
+
+      await Promise.all([chatPromise, messagePromise]);
+
+    } 
 
     await session.commitTransaction();
     // Then add each participant to the chat mapping

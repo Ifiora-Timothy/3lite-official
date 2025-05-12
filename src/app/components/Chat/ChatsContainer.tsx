@@ -96,9 +96,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ onViewProfile, onShowChatList, 
             size="sm" 
             icon={<User size={18} />} 
             onClick={onViewProfile}
-            className='hidden md:flex'
           >
+            <div className="md:contents hidden">
+
             Profile
+            </div>
           </Button>
           <Button 
             variant="primary" 

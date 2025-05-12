@@ -12,7 +12,7 @@ interface ChatContextType {
   filterChats: (filter: 'all' | 'pinned' | 'ai' | 'group') => void;
   searchChats: (query: string) => void;
   showProfile:boolean;
-  setShowProfile:(showProfile: boolean) => void;
+  setShowProfile:(showProfile: any) => any;
   showChatList:boolean;
   setShowChatList:(showChatList: boolean) => void;
   isMobile:boolean;

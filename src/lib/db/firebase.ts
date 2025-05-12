@@ -8,7 +8,7 @@ import {
   serverTimestamp,
   remove,
   update,
-  connectDatabaseEmulator,
+  
   get,
 } from "firebase/database";
 import {

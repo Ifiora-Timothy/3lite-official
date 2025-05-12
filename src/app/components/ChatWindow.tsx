@@ -7,11 +7,11 @@ const ChatWindow = () => {
   const {setShowProfile,setShowChatList,isMobile} = useChat();
 
 
-
+  
   return (
     <div className="border-r w-full border-white/10 flex flex-col h-full">
       <ChatsContainer
-        onViewProfile={() => setShowProfile(true)}
+        onViewProfile={() => setShowProfile((prev:any) => !prev)}
         onShowChatList={() => setShowChatList(true)}
         isMobile={isMobile}
       />

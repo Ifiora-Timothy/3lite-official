@@ -2,6 +2,7 @@ import { PropsWithChildren } from "react";
 import { ChatProvider } from "../providers/ChatContext";
 import { ChatProvider as ChatNewProvider } from "../contexts/ChatContext";
 import SidebarMini from "../components/SidebarMini";
+import ProfilePanel from "../components/ProfilePanel";
 
 
 
@@ -21,6 +22,7 @@ export default function ChatLayout({ children }: PropsWithChildren) {
           </div>
 
           <div className="w-full relative">{children}</div>
+          <ProfilePanel/>
         </div>
       </ChatProvider>
     </ChatNewProvider>
