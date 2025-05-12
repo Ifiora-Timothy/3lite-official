@@ -294,7 +294,6 @@ chatSchema.statics.createGroupChat = async function ({
     );
 
     await session.commitTransaction();
-
     chat[0].participants.forEach((userId: mongoose.Types.ObjectId) => {
       FirebaseChat.addUserToChat(
         userId.toString(),
@@ -302,6 +301,7 @@ chatSchema.statics.createGroupChat = async function ({
         new Date()
       );
     });
+
     return chat[0];
   } catch (error) {
     // Rollback changes if anything fails
