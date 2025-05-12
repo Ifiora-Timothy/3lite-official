@@ -14,18 +14,29 @@ import { useDebouncedCallback } from "use-debounce";
 import { getUsersFromRegex } from "@/actions/dbFunctions";
 import { Chat } from "@/types";
 
+import {useRouter,  useSearchParams } from 'next/navigation';
 const ChatList = () => {
   const { activeUser: user } = useAuth();
-  const { chats, filterChats } = useChat();
+  const { chats } = useChat();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+  const updateSearchParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    router.push(`?${params.toString()}`);
+  };
+
 
   // Move all useState declarations to the top
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Chat[]>([]);
 
+  const currFilter = searchParams.get("filter")?? "all";
   
-  const [activeFilter, setActiveFilter] = useState<
-    "all" | "pinned" | "ai" | "group"
-  >("all");
+  type Ifilter= "all" | "pinned" | "ai" | "group";
+  const [activeFilter, setActiveFilter] = useState<Ifilter>(currFilter as Ifilter);
+  
 
   const { currChats } = useChatContext();
 
@@ -37,9 +48,27 @@ const ChatList = () => {
   );
 
   const handleFilterChange = (filter: "all" | "pinned" | "ai" | "group") => {
+    
+    updateSearchParam("filter", filter);
     setActiveFilter(filter);
-    filterChats(filter);
+
+    
   };
+  const filteredChats = renderedChats.filter((chat) => {
+    if (activeFilter === "all") {
+      return true;
+    } else if (activeFilter === "pinned") {
+      return chat.pinned;
+    } else if (activeFilter === "ai") {
+      return chat.type === "ai";
+    } else if (activeFilter === "group") {
+      return chat.type === "group";
+    }
+    return false;
+  }
+  );
+
+
 
   const debounced = useDebouncedCallback(async (userRegex: string) => {
 
@@ -117,7 +146,7 @@ const ChatList = () => {
       </div>
 
       <div className="flex-1 w-full h-full overflow-y-auto p-2">
-        {chats.length === 0 ? (
+        {filteredChats.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <div className="mb-4 p-4 rounded-full bg-primary-color/10">
               <MessageSquare className="text-primary-color" size={32} />
@@ -131,7 +160,7 @@ const ChatList = () => {
           </div>
         ) : (
           <div className="space-y-2 overflow-x-auto h-full">
-            {renderedChats.map((chat) => (
+            {filteredChats.map((chat) => (
 
               <ChatListItem key={chat._id} chat={chat} />
             ))}

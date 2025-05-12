@@ -9,7 +9,6 @@ interface ChatContextType {
   messages: ChatMessage[];
   setActiveChat: (chat: Chat) => void;
   sendMessage: (content: string) => void;
-  filterChats: (filter: 'all' | 'pinned' | 'ai' | 'group') => void;
   searchChats: (query: string) => void;
   showProfile:boolean;
   setShowProfile:(showProfile: any) => any;
@@ -25,7 +24,6 @@ const ChatContext = createContext<ChatContextType>({
   messages: [],
   setActiveChat: () => {},
   sendMessage: () => {},
-  filterChats: () => {},
   searchChats: () => {},
   showProfile:false,
   setShowProfile: () => {},
@@ -130,17 +128,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   };
 
-  const filterChats = (filter: 'all' | 'pinned' | 'ai' | 'group') => {
-    if (filter === 'all') {
-      setFilteredChats(chats);
-    } else if (filter === 'pinned') {
-      setFilteredChats(chats.filter(chat => chat.pinned));
-    } else if (filter === 'ai') {
-      setFilteredChats(chats.filter(chat => chat.type === 'ai'));
-    } else if (filter === 'group') {
-      setFilteredChats(chats.filter(chat => chat.type === 'group'));
-    }
-  };
+
 
   const searchChats = (query: string) => {
     if (!query.trim()) {
@@ -166,7 +154,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         messages,
         setActiveChat: handleSetActiveChat,
         sendMessage,
-        filterChats,
         searchChats,
         showProfile,
         isMobile,

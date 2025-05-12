@@ -3,14 +3,16 @@ import { X, Edit, ExternalLink, Copy, Grid } from "lucide-react";
 import Button from "../UI/Button";
 import Avatar from "../UI/Avatar";
 
+const ProfilePanel = () => {
+  const { showProfile, activeChat, setShowProfile } = useChat();
 
-const ProfilePanel= () => {
-  const { showProfile,activeChat,setShowProfile } = useChat();
-
-  console.log({activeChat})
+  console.log({ activeChat });
   const user = {
-    name: activeChat?.username?? "0x00",
-    address: activeChat?.type=="group"?"0x00":activeChat?.walletAddress?? "0x00",
+    name: activeChat?.username ?? "0x00",
+    address:
+      activeChat?.type == "group"
+        ? "0x00"
+        : activeChat?.walletAddress ?? "0x00",
     bio: "Web3 developer and NFT collector. Building on Ethereum since 2018.",
     tokens: [
       { name: "Ethereum", symbol: "ETH", balance: "1.45", icon: "⧫" },
@@ -26,47 +28,47 @@ const ProfilePanel= () => {
         `md:min-w-60 lg:min-w-80  opacity-95 bg-[var(--bg-color)] md:w-60 min-w-60 w-full absolute md:relative right-0 h-full z-30 `,
         {
           hidden: !showProfile,
-          "flex": showProfile,
+          flex: showProfile,
         }
       )}
     >
-      <div
-        className={`glass-effect  h-full flex flex-col w-full`}
-      >
+      <div className={`glass-effect  h-full flex flex-col w-full`}>
         <div className="p-5 flex items-center justify-between border-b border-white/10">
           <h2 className="text-xl font-bold">Profile</h2>
-          
-            <button
-              onClick={()=>{
-                setShowProfile(false);
-              }}
-              className="p-1 hover:bg-hover-bg rounded-full"
-              aria-label="Close profile"
-            >
-              <X size={20} />
-            </button>
-          
+
+          <button
+            onClick={() => {
+              setShowProfile(false);
+            }}
+            className="p-1 hover:bg-hover-bg rounded-full"
+            aria-label="Close profile"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           {/* Header */}
           <div className="text-center mb-6">
             <div className="mx-auto mb-3">
-              <Avatar src={activeChat?.avatar} name={user.name} size="xl" status="online" />
+              <Avatar
+                src={activeChat?.avatar}
+                name={user.name}
+                size="xl"
+                status="online"
+              />
             </div>
             <h1 className="text-2xl font-bold mb-1">{user.name}</h1>
 
             <div className="flex items-center justify-center gap-1.5 mb-3">
               <div className="px-2 py-1 bg-primary-color/10 rounded-full text-sm truncate max-w-[200px]">
-                {user.address.substring(0, 6)}...
-                {user.address.substring(user.address.length - 4)}
+                <WalletAddressDisplay
+                  isGroupChat={activeChat?.type == "group"}
+                  walletAddress={user.address}
+                  className="text-sm font-medium"
+                />
               </div>
-              <button
-                className="p-1 hover:bg-hover-bg rounded-full"
-                aria-label="Copy address"
-              >
-                <Copy size={16} />
-              </button>
+
               <button
                 className="p-1 hover:bg-hover-bg rounded-full"
                 aria-label="View on explorer"
@@ -139,5 +141,6 @@ const ProfilePanel= () => {
 import { Send } from "lucide-react";
 import clsx from "clsx";
 import { useChat } from "../contexts/ChatContext";
+import WalletAddressDisplay from "./WalletAddressDisplay";
 
 export default ProfilePanel;
